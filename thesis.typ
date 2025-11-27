@@ -12,12 +12,12 @@
   ),
   keywords: (
     cs: [DOPLŇTE, SEM, KLÍČOVÁ, SLOVA],
-    en: [INSERT, KEYWORDS, HERE]
+    en: [INSERT, KEYWORDS, HERE],
   ),
   acknowledgement: (
     en: [
       I would like to acknowledge everyone who contributed to the creation of this fine piece of work.
-    ]
+    ],
   ),
   abstract: (
     cs: [
@@ -25,9 +25,21 @@
     ],
     en: [
       Insert the abstract of your theses in English here.
-    ]
+    ],
   ),
   title_pages: "title-pages.pdf",
-  author: [Bc. Petr Boháč],
-  citations: "citations.bib"
+  author: "Bc. Petr Boháč",
+  supervisor: "Ing. Jan Kolaja, Ph.D.",
+  consultant: "Ing. Jan Klimeš",
+  citations: "citations.bib",
 )
+
+= Introduction
+
+#include "chapters/introduction.typ"
+
+= Problem analysis
+
+= Conclusion
+
+#include "chapters/conclusion.typ"
