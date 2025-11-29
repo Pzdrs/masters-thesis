@@ -40,6 +40,22 @@
 
 = Problem analysis
 
+= Building the application
+
+== Visualization
+
+== Analysis
+
+= Deploying to production
+
+== Testing
+
+== User documentation
+
+== Packaging
+
+= Possibilities for improvement
+
 = Conclusion
 
 #include "chapters/conclusion.typ"
