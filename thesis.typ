@@ -30,7 +30,6 @@
   title_pages: "title-pages.pdf",
   author: "Bc. Petr Boháč",
   supervisor: "Ing. Jan Kolaja, Ph.D.",
-  consultant: "Ing. Jan Klimeš",
   citations: "citations.bib",
 )
 
@@ -38,13 +37,26 @@
 
 #include "chapters/introduction.typ"
 
+= Existing solutions
+
 = Problem analysis
 
 = Building the application
 
+frameworks - tkinter vs pyqt (notable mentions for pygame)
+
 == Visualization
 
+render framework selfbuilt
+renderer - layout strategy - backend - matplotlib backend
+
 == Analysis
+
+classic statistical methods
+machine learning methods
+supervised vs unsupervised - unsupervised needs to be monitored - we do monitor it so its the way to go
+
+ODIS vs INCA (excel vs dat)
 
 = Deploying to production
 
@@ -52,9 +64,15 @@
 
 == User documentation
 
+probably mkdocs on local server running under the desktop app
+
 == Packaging
 
+pyinstaller, nuitka, brief comparison
+
 = Possibilities for improvement
+
+rendering framework - figure management (we only do single figures rn)
 
 = Conclusion
 
