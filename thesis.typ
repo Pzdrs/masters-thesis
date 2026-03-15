@@ -97,29 +97,30 @@ Because this method has had so much time to mature, the software and hardware ec
 
 == Current workflow
 
-excel
+It is no secret that large corporations across all industries prefer to use commercial software solutions for their operations, and the automotive industry is no exception. Microsoft is the dominant provider of office software, and many companies rely on it for almost all of their day to day operations from email, meetings, and document editing to data analysis and visualization. 
+
+Microsoft Excel is an excellent tool for many tasks and can be more than sufficient for for even complex data analysis. That it why it is so widely used in the industry, including at Škoda Auto, where it is the primary tool for analyzing telemetry data collected through the OBD-II port. The current workflow is as follows:
+
+=== Data acquisition
+
+Data is collected using ODIS and exported in CSV format. The CSV data is then imported into Excel using its built-in import functionality, which allows users to specify data types and delimiters. Once imported, the Excel spreadsheet with a structure similar to that shown in @excel-structure is saved to a shared network drive, making it accessible to other team members for further analysis and collaboration.
+
+#figure(
+  image("assets/excel-structure.png", width: 100%),
+  caption: [
+    Structure of the Excel spreadsheet after importing the CSV data. 
+  ],
+) <excel-structure>
+
+=== Data analysis
+
+Engineers and technicians use Excel's functions, formulas, and pivot tables to analyze the data. This analysis may include calculating summary statistics, creating charts and graphs, and performing basic data manipulation on a single file. When multiple test runs need to be compared, engineers must manually open several spreadsheets and compare the data side by side. This process can become cumbersome and error-prone as the number of files increases, especially on the corporate-issued laptops, which often have limited processing power, memory and a small screen size.
+
+It is this second part of the workflow that is particularly inefficient and time-consuming, which motivates the effort to find a better solution.
 
 == Exisiting solutions
 
 Before proceeding with the development of a custom solution, an analysis of existing solutions should be conducted. This analysis should include both open-source and commercial products, as well as systems that may not be explicitly designed for the intended use case but could be adapted to fulfill the required objectives.
-
-
-
-The telemetry collected during vehicle testing represents a significant source of information for engineers working on vehicle development. However, the usefulness of this data strongly depends on how efficiently it can be processed, analyzed, and interpreted. Based on preliminary observations of the current workflow, several challenges can be identified that make the analysis process time-consuming and inefficient.
-
-One of the main issues is the large volume of collected data. Each test drive generates datasets containing measurements from dozens or even hundreds of sensors. These may include parameters such as temperature, pressure, airflow, engine load, and vehicle speed. Since tests are often repeated multiple times under slightly different conditions, the resulting datasets quickly grow to a size that is difficult to handle manually. Engineers are therefore required to spend a considerable amount of time filtering relevant information from raw telemetry.
-
-Another challenge lies in the fragmentation of the tools used for analysis. In many cases, different parts of the analysis workflow rely on separate software tools. For example, raw data may first be exported from the vehicle's data logging system, then processed in spreadsheet software or specialized engineering tools, and finally visualized using another application. Switching between multiple tools introduces inefficiencies, increases the likelihood of human error, and complicates collaboration between team members.
-
-The lack of automation in repetitive tasks is also a significant pain point. Many steps in the workflow, such as cleaning datasets, aligning measurements from different sensors, or generating standard graphs for reporting, are performed manually. While these tasks are relatively straightforward, performing them repeatedly for every test drive consumes valuable engineering time that could otherwise be spent interpreting results or improving vehicle design.
-
-Another important issue is the difficulty of comparing multiple test runs. Engineers often need to evaluate how a vehicle behaves under slightly different environmental conditions or after modifications to specific components. However, comparing datasets from different tests can be cumbersome when data is stored in separate files or processed using inconsistent methods. Without a standardized analysis pipeline, drawing reliable conclusions becomes more challenging.
-
-Additionally, data organization and accessibility can present problems. Test data may be stored across various folders, servers, or personal workstations, making it difficult for team members to locate the exact dataset they need. This lack of centralized storage can also lead to version control issues, where multiple copies of the same dataset exist with slight differences.
-
-Finally, the current workflow may offer limited support for visualization and interactive analysis. While static graphs can provide useful insights, engineers often benefit from interactive tools that allow them to quickly explore telemetry data, zoom into specific sections of a test run, or overlay multiple parameters in real time. Without such capabilities, identifying patterns or anomalies in the data can be significantly slower.
-
-Addressing these challenges will be essential in designing an effective software solution. By improving automation, integrating analysis tools, and providing better visualization and data management capabilities, it should be possible to significantly streamline the telemetry analysis workflow. The next step in the project will therefore be to identify the specific requirements that such a system must fulfill in order to support engineers and technicians in their daily work.
 
 = Building the application
 
