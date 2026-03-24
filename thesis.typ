@@ -163,7 +163,44 @@ Furthermore, many professional platforms rely on proprietary data formats or tig
 
 = Building the application
 
-frameworks - tkinter vs pyqt (notable mentions for pygame)
+TThe topic of multiplatform desktop applications is a very deep one, and it is very easy to get caught up in the details of the various frameworks and technologies available for building such applications. That is why we need to establish some facts and the particular requirements of our application before we can start evaluating the options.
+
+Pretty much all the computers used by non-IT professionals at Škoda Auto run Microsoft Windows, so we can safely assume that the target platform for our application is Windows. However, it is still desirable to have the option to run the application on other platforms such as Linux or macOS, which motivates the need for a cross-platform solution.
+
+== Selecting the programming language
+
+As for the programming language and its ecosystem, making the right choice is crucial for the success of the project in the long term, as it decreases the risk of running into insurmountable technical issues during development and maintenance. There are realistically two main approaches: native development using platform-specific tools and languages, or using a cross-platform framework that abstracts away platform-specific details and allows us to write code once and run it on multiple platforms.
+
+Native applications, often written in languages such as C++ or C\#, tend to have better performance and can take full advantage of platform-specific features. In particular, C++ is widely used for high-performance desktop applications and offers fine-grained control over system resources, which could make the application more efficient and snappier from a user perspective. However, native development typically requires separate codebases for each platform, which can be costly and time-consuming to develop and maintain.
+
+On the other hand, cross-platform frameworks allow us to write a single codebase that can run on multiple platforms, which can significantly reduce development time and costs. One popular approach is using JavaScript-based frameworks such as Electron, which enables developers to build desktop applications using web technologies like HTML, CSS, and JavaScript @electron_docs. While Electron simplifies cross-platform development and has a large ecosystem, it is often associated with higher memory usage and performance overhead compared to native solutions.
+
+The main technical requirements for this project were rapid prototyping, ease of development, and maintainability for the author and possibly other developers in the future. C\# with the .NET framework is a popular choice for Windows development, but its cross-platform capabilities, while improving, may still introduce limitations depending on the use case. Java is another option that is inherently cross-platform and has a large ecosystem, but it may be unnecessarily complex for a relatively simple desktop application.
+
+Python, on the other hand, is a versatile language with a large ecosystem of libraries and frameworks for building desktop applications, and it has good support for cross-platform development. It is also widely used for data analysis and visualization, which makes it particularly suitable for applications that require such functionality @mckinney_python_2013 @noauthor_matplotlib_nodate. For these reasons, and because of the author's familiarity with the language, Python was chosen as the programming language for this project.
+
+== Desktop application frameworks
+
+Software frameworks provide a structured way to build applications by offering pre-built components and tools that handle common tasks, such as user interface design, event handling, and data management. For desktop applications, there are several popular frameworks available for Python, including PyQt, Tkinter and Kivy.
+
+Python is quite often used for building tools with simple graphical user interfaces using lightweight frameworks such as Pygame or the aforementioned Tkinter. Frameworks like these are easy to learn and can be sufficient for basic applications, but they may not provide the level of polish and user experience expected in a professional setting. For a more modern and responsive user interface, frameworks like PyQt or Kivy are often preferred. PyQt is a set of Python bindings for the Qt application framework, which is widely used for developing cross-platform applications with native look and feel. Kivy, on the other hand, is an open-source Python library for developing multitouch applications, which can also be used for desktop applications. Both frameworks have their own strengths and weaknesses, so the choice between them came down to personal preference of the author.
+
+PyQt has a slightly steeper learning curve and can be more complex to set up, but it offers a more traditional desktop application experience with a wide range of widgets and tools for building complex user interfaces. One particularly powerful feature of PyQt is its ```python QSettings``` system, which provides a convenient platform-independant way to store and retrieve application settings across sessions. For example, on Windows, settings are typically stored in the registry, while on Linux they are stored in configuration files. By using QSettings' simple API (as shown in @qsettings-example), developers can abstract away these platform-specific details and ensure that user preferences and application state are preserved seamlessly across different operating systems.
+
+#figure(
+  caption: [Example of the QSettings API],
+  [
+    ```python
+      settings = QSettings()
+
+      # Set a value
+      settings.setValue("username", "JohnDoe")
+
+      # Get a value
+      username = settings.value("username", "defaultUser")
+    ```
+  ],
+) <qsettings-example>
 
 == Visualization
 
