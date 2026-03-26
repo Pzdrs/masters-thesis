@@ -77,7 +77,9 @@ The output is typically exported in CSV format, which can be easily imported int
 
 === Instrumented Vehicle Data Acquisition
 
-The second method of data collection involves equipping the vehicle with a large number of additional sensors and aggregating data from the vehicle's internal systems using dedicated supporting hardware (similar to @etas-hardware). Compared to the first approach, this method is significantly more complex and costly, and the installation process typically requires approximately two days. However, it enables the collection of far more comprehensive and detailed telemetry data, which is essential for in-depth analysis and optimization of vehicle performance.
+The second method of data collection involves equipping the vehicle with a large number of additional sensors and aggregating data from the vehicle's internal systems using dedicated supporting hardware (similar to @etas-hardware). In practice, this means putting the vehicle up on a lift, disassembling parts of the engine bay, and installing various sensors to measure parameters that are not available through the OBD-II port. This can include additional temperature sensors, pressure sensors, accelerometers, and other specialized equipment depending on the specific requirements of the test. An example of such a setup is shown in @engine-bay, where various sensors are installed in the engine bay of a test vehicle. The data from these sensors, along with signals from the car's internal systems, is then aggregated using dedicated hardware, such as the ETAS data acquisition system (as shown in @etas-hardware-installed and @etas-hardware-installed-topview), which can handle high sampling rates and large volumes of data.
+
+Compared to the first approach, this method is significantly more complex and costly, and the installation process typically requires approximately two days. However, it enables the collection of far more comprehensive and detailed telemetry data, which is essential for in-depth analysis and optimization of vehicle performance.
 
 #figure(
   image("assets/etas-hardware.png", width: 100%),
@@ -87,10 +89,9 @@ The second method of data collection involves equipping the vehicle with a large
   ],
 ) <etas-hardware>
 
-For example, the #abbr("ECU") often regulates certain components through feedback control loops rather than providing direct measurements. A typical case is the main radiator fan, whose operation is controlled using #abbr("PWM", "Pulse-Width Modulation") to adjust the cooling power dynamically. As a result, the fan speed does not directly correspond to the engine speed, and the actual fan rotational speed is not always available as a measured signal. In such cases, the fan speed may need to be estimated indirectly from related variables such as voltage, current, and #abbr("PWM") duty cycle. By installing an additional sensor that directly measures the fan's rotational speed, the system can provide a precise and readily usable measurement, which significantly simplifies subsequent analysis #footnote[A photograph of the instrumented engine bay cannot be published due to confidentiality restrictions. During measurements, vehicles are equipped with numerous additional sensors and data acquisition cables, producing a dense instrumentation layout that differs substantially from the standard vehicle configuration.
-].
+For example, the #abbr("ECU") often regulates certain components through feedback control loops rather than providing direct measurements. A typical case is the main radiator fan, whose operation is controlled using #abbr("PWM", "Pulse-Width Modulation") to adjust the cooling power dynamically. As a result, the fan speed does not directly correspond to the engine speed, and the actual fan rotational speed is not always available as a measured signal. In such cases, the fan speed may need to be estimated indirectly from related variables such as voltage, current, and #abbr("PWM") duty cycle. By installing an additional sensor that directly measures the fan's rotational speed, the system can provide a precise and readily usable measurement, which significantly simplifies subsequent analysis.
 
-In this configuration, the logging device is typically a laptop computer running specialized third-party software designed for high-fidelity data acquisition. At Škoda Auto, the software commonly used for this purpose is #abbr("INCA", "Integrated Calibration and Acquisition System"), a commercial tool developed by ETAS GmbH. This software provides advanced capabilities for data acquisition, calibration, and analysis, making it well suited for the complex requirements of high-resolution telemetry data collection @etas_inca_products.
+In this configuration, the logging device is typically a laptop computer running specialized third-party software designed for high-fidelity data acquisition (as illustrated in @cockpit). At Škoda Auto, the software commonly used for this purpose is #abbr("INCA", "Integrated Calibration and Acquisition System"), a commercial tool developed by ETAS GmbH. This software provides advanced capabilities for data acquisition, calibration, and analysis, making it well suited for the complex requirements of high-resolution telemetry data collection @etas_inca_products.
 
 Compared to the OBD-II-based method, this approach generates significantly larger datasets, often containing measurements from thousands of sensors at different high sampling rates. A simple text-based format would be impractical for storing such large volumes of data, so a more sophisticated standardized format is used. The most common format for this type of data is the #abbr("MDF", "Measurement Data Format"), which is a binary file format designed specifically for storing large volumes of measurement data efficiently. The MDF format allows for the storage of complex datasets with multiple channels, varying sampling rates, and metadata, making it ideal for high-fidelity telemetry data @asam_mdf. The majority of technicians and engineers at Škoda Auto working with version 3 of the MDF format, but slow adoption of version 4 is expected in the near future.
 
@@ -168,8 +169,6 @@ TThe topic of multiplatform desktop applications is a very deep one, and it is v
 Pretty much all the computers used by non-IT professionals at Škoda Auto run Microsoft Windows, so we can safely assume that the target platform for our application is Windows. However, it is still desirable to have the option to run the application on other platforms such as Linux or macOS, which motivates the need for a cross-platform solution.
 
 == Selecting the programming language
-
-// tabulku na comparison of languages
 
 As for the programming language and its ecosystem, making the right choice is crucial for the success of the project in the long term, as it decreases the risk of running into insurmountable technical issues during development and maintenance. There are realistically two main approaches: native development using platform-specific tools and languages, or using a cross-platform framework that abstracts away platform-specific details and allows us to write code once and run it on multiple platforms.
 
@@ -366,3 +365,39 @@ rendering framework - figure management (we only do single figures rn)
 = Conclusion
 
 #include "chapters/conclusion.typ"
+
+#attachments(
+  attach_link("GitLab repository for the project", "https://gitlab.com/pycrs-epa/graph-insights"),
+  attach_content("Instrumented engine bay", [
+    #figure(
+      image("assets/measuring-engine-bay.JPG", width: 120%),
+      caption: [
+        The engine bay of a test vehicle instrumented with additional sensors for data acquisition. 
+      ],
+    ) <engine-bay>
+  ]),
+  attach_content("Instrumented cockpit", [
+    #figure(
+      image("assets/measuring-cockpit.JPG", width: 120%),
+      caption: [
+        State of the vehicle's cockpit during test drives.
+      ],
+    ) <cockpit>
+  ]),
+  attach_content("Installed ETAS hardware", [
+    #figure(
+      image("assets/measuring-etas-hardware.JPG", width: 120%),
+      caption: [
+        ETAS hardware installed in the backseat of a test vehicle for data aggregation.
+      ],
+    ) <etas-hardware-installed>
+  ]),
+  attach_content("Top-down view of ETAS hardware", [
+    #figure(
+      image("assets/measuring-etas-hardware-topview.JPG", width: 120%),
+      caption: [
+        Top-down view of the ETAS hardware installed in the backseat of a test vehicle for data aggregation.
+      ],
+    ) <etas-hardware-installed-topview>
+  ]),
+)
