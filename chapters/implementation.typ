@@ -102,7 +102,7 @@ The primary IDE of choice for this project was PyCharm, a popular Python IDE dev
 
 For the environment itself, the Nix package manager was used to create a reproducible development environment. Nix allows developers to define their development environment in a declarative way, specifying the exact versions of tools and libraries needed for the project. This ensures that all developers working on the project have a consistent environment, which can help avoid issues related to dependency conflicts or differences in tool versions while keeping everything isolated from the system environment @how_nix_works. The specific configuration used for this project is shown in @nix-dev-env, which includes Python 3.11 and the necessary packages for development. Direnv was also used to automatically load the Nix environment when entering the project directory, further streamlining the development workflow @direnv.
 
-// TODO: reference the designer alias in the shell hook when we talk about the UI design process
+#todo("reference the designer alias in the shell hook when we talk about the UI design process")
 #figure(
   caption: [Nix development environment configuration],
   [
@@ -159,6 +159,25 @@ As the Nix configuration above shows, the package manager of choice for managing
 ) <pyproject-toml>
 
 Finally, Git was used for version control, more so for the sake of good practice and maintaining a history of changes rather than for collaboration, as the project was developed solely by the author. Git allows developers to track changes to their code, revert to previous versions if needed, and manage different branches of development. When working on a new feature or a large refactor, branching allows developers to isolate their changes from the main codebase until they are ready to be merged, which can help prevent conflicts, maintain a cleaner commit history, and allows the developer to work on multiple features or bug fixes simultaneously without interference @git. For this project, a simple branching strategy was used, with a main branch for stable code and feature branches for new development. Regular commits were made to the feature branches, and once a feature was complete and tested, it was merged back into the main branch using the rebase strategy to maintain a clean commit history. The source code for the project was put up on a self-hosted GitLab instance, which provided a private repository for the project and allowed for easy access and management of the codebase.
+
+== Designing the user interface
+
+#todo("popis jak fungujou widgety v qt")
+
+The requirements for the user interface were to be simple, intuitive, and efficient for the target users, who are engineers and technicians at Škoda Auto. The application needed to provide a clear and organized way to visualize and analyze tabular data exported from ODIS, with a focus on usability and accessibility for users who may not have extensive programming experience.
+
+There are two ways to design a user interface in Qt: using code or using a visual design tool, preferably the official Qt Designer. For very simple applications, setting up all the widgets and layouts in code can be straightforward and may even be quicker and easier than wiring up a design file. However, for more complex applications with multiple windows, dialogs, and a variety of widgets, using a visual design tool is a no-brainer, as it allows developers to quickly and easily create and modify the user interface without having to write a lot of code.
+
+Each window or dialog in the application was designed as a separate .ui file using Qt Designer. A UI file is simply an XML file that describes the layout and properties of the widgets in a particular window or dialog. Because of its text-based nature, it can be easily version-controlled and merged using Git, which is a significant advantage over binary design files used by some other frameworks. The process of loading a UI file in Python is straightforward, as shown in @listing:load-ui. The ```uic.loadUi``` function takes the path to the .ui file and the instance of the widget to load it into, and it automatically creates the necessary widgets and layouts as defined in the design file. 
+
+#figure(
+  caption: [Loading the UI file in Python],
+  [
+    ```python
+    uic.loadUi(path.join(BASE_DIR, 'ui/analysis_overview.ui'), self)
+    ```
+  ],
+) <listing:load-ui>
 
 
 == Application architecture
