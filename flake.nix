@@ -15,7 +15,7 @@
       let
         pkgs = import nixpkgs { inherit system; };
         buildInputs = with pkgs; [
-          typst gnumake xdg-utils
+          typst gnumake xdg-utils plantuml graphviz
         ];
       in
       {

@@ -1,0 +1,12 @@
+@startuml user-workflow
+
+autonumber
+User -> Application: Import one or more files
+
+Application -> User: Show available channels
+
+User -> Application: Select file/channel combination\nSet visualization options
+
+Application -> User: Show visualization
+
+@enduml

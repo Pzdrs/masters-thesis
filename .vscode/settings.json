@@ -1,0 +1,6 @@
+{
+  "plantuml.exportFormat": "svg",
+  "plantuml.exportOutDir": "assets/diagram",
+  "plantuml.exportIncludeFolderHeirarchy": false,
+  "plantuml.exportSubFolder": false
+}

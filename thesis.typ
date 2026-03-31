@@ -41,6 +41,10 @@
 
 #include "chapters/problem-analysis.typ"
 
+= Designing the software architecture
+
+#include "chapters/architecture.typ"
+
 = Building the application
 
 #include "chapters/implementation.typ"
