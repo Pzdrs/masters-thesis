@@ -1,0 +1,28 @@
+@startuml dataframe-column-conversion
+start
+
+:First pass:
+df = df.convert_dtypes();
+
+:Select non-numeric columns (failed conversions);
+
+while (More columns?) is (yes)
+  :Pick column;
+
+    :Remove whitespace;
+    :Replace commas with dots;
+    :Try pd.to_numeric();
+    
+  if (Clean & convert succeeds?) then (yes)
+    
+  else (no)
+    :Drop column from df;
+  endif
+
+endwhile (no more columns)
+
+:Second pass:
+df = df.convert_dtypes();
+
+stop
+@enduml

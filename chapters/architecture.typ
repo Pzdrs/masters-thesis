@@ -94,6 +94,58 @@ PyQt has a slightly steeper learning curve and can be more complex to set up, bu
 
 The Qt framework (and consequently the PyQt library) has more than 25 years of development and a large community, which means that it is well-documented and has a wide range of resources available for learning and troubleshooting. It has a robust layout system that allows developers to create complex and responsive user interfaces that adapt to different screen sizes and resolutions. Additionally, PyQt provides a wide range of widgets and tools for building modern desktop applications, which will be touched upon in the next section @qt_software. All of these factors contributed to the decision to use PyQt for this project, as it provides a powerful and flexible framework for building a professional-quality desktop application with a modern user interface.
 
+== Data ingestion
+
+#todo("tohle je implementace ne architektura bruh")
+
+When a user wants to add new data to the application, they can do so by selecting a file (or multiple files) from their file system using a file dialog. The application must then take these files and *asynchronously* load them in the background while keeping the user interface responsive. It must also inform the user about the progress of the loading process, so they are not left wondering if the application is frozen or if something went wrong. This is typically achieved by using a separate thread or process to handle the loading of data, while the main thread continues to run the user interface. The application can then use signals and slots (or other inter-thread communication mechanisms) to update the user interface with progress information and to notify the user when the loading process is complete.
+
+I've chosen to go with a multithreaded pipeline approach for data ingestion. There are a number of distinct, ordered steps that need to be performed when loading a data file. Keeping all the logic for these steps in a single function would make it very difficult to read and maintin. It also makes it easier to unit test the individual steps of the loading process, as they can be tested in isolation from each other. The pipeline approach also allows for better error handling, as errors can be caught and handled at the appropriate stage of the loading process, rather than having to catch all errors in a single function. The complete list of stages in the data loading pipeline is shown in table @tab:data-loading-pipeline.
+
+#figure(
+  table(
+    columns: 2,
+    [*Stage*], [*Description*],
+    [`read_from_excel`], [Uses `pandas.read_excel()` to read in an Excel file to memory as a `DataFrame`],
+    [`extract_header_and_shift`], [Parses the metadata string from the first row and discards it],
+    [`resolve_duplicate_columns`],
+    [Looks for duplicate column names in the `DataFrame`, removing all potential occurrences and logging apppropriately],
+
+    [`resolve_nameless_columns`],
+    [Looks for columns without a name in the `DataFrame`, removing all potential occurrences and logging apppropriately],
+
+    [`convert_dtypes`], [Tries to convert columns to a numeric type, dropping any columns that cannot be converted],
+    [`reindex_to_timestamps`],
+    [Reindexes the `DataFrame` from sequential integers to timestamps, using the `#Time` column as the source],
+
+    [`drop_time_channel`], [Drops the time channel from the `DataFrame`, as it is no longer needed after reindexing],
+    [`derive_channels`], [Uses a predefined set of rules to derive new channels from existing ones],
+    [`normalize_column_names`], [Normalizes column names to a consistent format (case and whitespace)],
+  ),
+  caption: [Stages of the data loading pipeline (in order)],
+) <tab:data-loading-pipeline>
+
+When an Excel file is ran through the pipeline, the `pandas` package is used to load it into a `DataFrame` object, which is a powerful data structure for handling tabular data and is the primary data structure used in the application. The Excel files we are working with have a specific format, where the first row contains metadata while the actual data starts from the second row. As per the example in @misc:metadata-string, the metadata contains the exact date and time when the record button was pressed, the internal identifier of the particular vehicle, and then an arbitrary number of space separated strings.
+
+#figure(
+  ```
+  #2025-02-17 12:38:35 TMBNH9NY0SF000226 trasa MB-LIB-MB
+  ```,
+  caption: [Example of the metadata string in the first row of the Excel files],
+) <misc:metadata-string>
+
+Following metadata extraction, the pipeline filters out possible duplicate and nameless columns, as these are not expected in the data and are likely to cause issues later on. The next stage is to try to convert all columns to a numeric type, as this is the expected format for the data and it allows for more efficient storage and processing. Any columns that cannot be converted to a numeric type are dropped from the `DataFrame`, as they are not useful for our purposes. The logic behind this stage is depicted in @diagram:convert-dtypes.
+
+#figure(
+  image(
+    "../assets/diagram/dataframe-column-conversion.svg",
+    width: 60%,
+  ),
+  caption: [Logic behing the `convert_dtypes` stage of the data loading pipeline],
+) <diagram:convert-dtypes>
+
+The next stage is to reindex the `DataFrame` from sequential integers to timestamps, using the `#Time` column as the source. This allows us to easily perform time-based operations on the data, such as resampling or rolling window calculations. After reindexing, the time channel is dropped from the `DataFrame`, as it is no longer needed. The next stage is to derive new channels from existing ones using a set of rules defined in `processing/derived_channels.py`. Most commonly these include power calculation from voltage and current channels. Finally, the column names are stripped of whitespace and normalized to a consistent case (lowercase) to avoid issues with inconsistent naming conventions in the source data#footnote("Change in column names is a frequent occurrence when switching between different versions of data recording software.").
+
 == User workflow
 
 The concept behind the application's main purpose is not complicated - it takes in data, the user decides what exactly and how they want to display it, and the application generates a visualization based on those choices. The main workflow should therefore be very simple and intuitive to actually perform its intended purpose - to save time for engineers and technicians. The general workflow is depicted in @img:user-workflow.
@@ -102,7 +154,7 @@ The concept behind the application's main purpose is not complicated - it takes 
   image(
     "../assets/diagram/user-workflow.svg",
   ),
-  caption: [General visualization workflow]
+  caption: [General visualization workflow],
 ) <img:user-workflow>
 
-#todo("vysvetlit jak ma ten workflow fungovat v ty appce")
+#todo("idk jestli tohole neposlat jinam")
