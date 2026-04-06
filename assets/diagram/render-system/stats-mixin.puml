@@ -1,0 +1,28 @@
+@startuml stats-mixin
+skinparam classAttributeIconSize 0
+
+class DescriptiveStatisticsMixin <<abstract>> {
+  +annotate_extrema(x, y)
+  +annotate_statistics(x, y)
+  +plot_extrema(x_min, y_min, x_max, y_max) <<abstract>>
+  +plot_statistics(y) <<abstract>>
+}
+
+class MatplotlibBackend
+
+MatplotlibBackend --|> DescriptiveStatisticsMixin
+
+note right of DescriptiveStatisticsMixin
+plot_extrema(...) and plot_statistics(...)
+are ABSTRACT.
+Every backend that uses this mixin
+MUST IMPLEMENT BOTH.
+
+--
+
+annotate_statistics:
+- calls plot_statistics(y)
+- optionally calls annotate_extrema(x, y)
+end note
+
+@enduml

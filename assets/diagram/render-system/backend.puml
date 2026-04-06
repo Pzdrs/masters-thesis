@@ -1,0 +1,68 @@
+@startuml backend
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+package "Layouts" as Layouts {
+  class LayoutStrategy <<abstract>> {
+    +render(backend, context)
+  }
+
+  class PerFilePlot {
+    +render(backend, context)
+  }
+
+  class PerChannelPlot {
+    +render(backend, context)
+  }
+}
+
+package "Backends" as Backends {
+  interface RenderBackend {
+    +begin_figure(n_plots, share_x, share_y)
+    +begin_plot(index, title, **kwargs)
+    +line(x, y, label, style)
+    +end_plot()
+    +end_figure()
+    +show()
+    +cleanup_current()
+    +cleanup()
+    +get_current_plot()
+  }
+
+  class DeltaMixin <<abstract>> {
+    +calculate_delta(s1, s2)
+    +plot_delta(x, y)
+  }
+
+  class DescriptiveStatisticsMixin <<abstract>> {
+    +annotate_extrema(x, y)
+    +annotate_statistics(x, y)
+    +plot_extrema(x_min, y_min, x_max, y_max)
+    +plot_statistics(y)
+  }
+
+  class MatplotlibBackend {
+    +plot_delta(x, y)
+    +plot_extrema(x_min, y_min, x_max, y_max)
+    +plot_statistics(y)
+    +begin_figure(...)
+    +begin_plot(...)
+    +line(...)
+    +end_plot()
+    +end_figure()
+    +show()
+    +cleanup_current()
+    +cleanup()
+  }
+}
+
+LayoutStrategy <|-- PerFilePlot
+LayoutStrategy <|-- PerChannelPlot
+PerFilePlot ..> RenderBackend : calls backend API
+PerChannelPlot ..> RenderBackend : calls backend API
+
+RenderBackend <|.. MatplotlibBackend
+MatplotlibBackend --|> DeltaMixin
+MatplotlibBackend --|> DescriptiveStatisticsMixin
+
+@enduml

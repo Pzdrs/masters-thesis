@@ -1,0 +1,41 @@
+@startuml plugins
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+class RenderBackend {
+  -_plugins : dict[event -> callbacks]
+  +register_plugin(event, callback)
+  +_run_plugins(event, **kwargs)
+}
+
+class MatplotlibBackend {
+  +begin_figure(...)
+  +begin_plot(...)
+}
+
+class PluginCallback <<callable>>
+
+class lifecycle <<decorator>> {
+  +wrapper(self, *args, **kwargs)
+}
+
+RenderBackend ..> PluginCallback : stores callbacks
+MatplotlibBackend --|> RenderBackend
+MatplotlibBackend ..> lifecycle : @lifecycle(begin_figure/begin_plot)
+lifecycle ..> RenderBackend : calls _run_plugins(pre_*/post_*)
+
+note right of RenderBackend
+register_plugin("post_begin_plot", cb):
+- stores cb in _plugins["post_begin_plot"]
+_run_plugins(event):
+- invokes all callbacks for event
+end note
+
+note right of lifecycle
+wrapper():
+- _run_plugins("pre_" + event)
+- call real backend method
+- _run_plugins("post_" + event)
+end note
+
+@enduml

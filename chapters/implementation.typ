@@ -103,6 +103,56 @@ This modular structure allows for better organization of the code and makes it e
   caption: [Description of the `graph_insights` subpackages],
 ) <tab:dir-structure>
 
+== Data ingestion <section:data-ingestion>
+
+When a user wants to add new data to the application, they can do so by selecting a file (or multiple files) from their file system using a file dialog. The application must then take these files and *asynchronously* load them in the background while keeping the user interface responsive. It must also inform the user about the progress of the loading process, so they are not left wondering if the application is frozen or if something went wrong. This is typically achieved by using a separate thread or process to handle the loading of data, while the main thread continues to run the user interface. The application can then use signals and slots (or other inter-thread communication mechanisms) to update the user interface with progress information and to notify the user when the loading process is complete.
+
+I've chosen to go with a multithreaded pipeline approach for data ingestion. There are a number of distinct, ordered steps that need to be performed when loading a data file. Keeping all the logic for these steps in a single function would make it very difficult to read and maintin. It also makes it easier to unit test the individual steps of the loading process, as they can be tested in isolation from each other. The pipeline approach also allows for better error handling, as errors can be caught and handled at the appropriate stage of the loading process, rather than having to catch all errors in a single function. The complete list of stages in the data loading pipeline is shown in table @tab:data-loading-pipeline.
+
+#figure(
+  table(
+    columns: 2,
+    [*Stage*], [*Description*],
+    [`read_from_excel`], [Uses `pandas.read_excel()` to read in an Excel file to memory as a `DataFrame`],
+    [`extract_header_and_shift`], [Parses the metadata string from the first row and discards it],
+    [`resolve_duplicate_columns`],
+    [Looks for duplicate column names in the `DataFrame`, removing all potential occurrences and logging apppropriately],
+
+    [`resolve_nameless_columns`],
+    [Looks for columns without a name in the `DataFrame`, removing all potential occurrences and logging apppropriately],
+
+    [`convert_dtypes`], [Tries to convert columns to a numeric type, dropping any columns that cannot be converted],
+    [`reindex_to_timestamps`],
+    [Reindexes the `DataFrame` from sequential integers to timestamps, using the `#Time` column as the source],
+
+    [`drop_time_channel`], [Drops the time channel from the `DataFrame`, as it is no longer needed after reindexing],
+    [`derive_channels`], [Uses a predefined set of rules to derive new channels from existing ones],
+    [`normalize_column_names`], [Normalizes column names to a consistent format (case and whitespace)],
+  ),
+  caption: [Stages of the data loading pipeline (in order)],
+) <tab:data-loading-pipeline>
+
+When an Excel file is ran through the pipeline, the `pandas` package is used to load it into a `DataFrame` object, which is a powerful data structure for handling tabular data and is the primary data structure used in the application. The Excel files we are working with have a specific format, where the first row contains metadata while the actual data starts from the second row. As per the example in @misc:metadata-string, the metadata contains the exact date and time when the record button was pressed, the internal identifier of the particular vehicle, and then an arbitrary number of space separated strings.
+
+#figure(
+  ```
+  #2025-02-17 12:38:35 TMBNH9NY0SF000226 trasa MB-LIB-MB
+  ```,
+  caption: [Example of the metadata string in the first row of the Excel files],
+) <misc:metadata-string>
+
+Following metadata extraction, the pipeline filters out possible duplicate and nameless columns, as these are not expected in the data and are likely to cause issues later on. The next stage is to try to convert all columns to a numeric type, as this is the expected format for the data and it allows for more efficient storage and processing. Any columns that cannot be converted to a numeric type are dropped from the `DataFrame`, as they are not useful for our purposes. The logic behind this stage is depicted in @diagram:convert-dtypes.
+
+#figure(
+  image(
+    "../assets/diagram/dataframe-column-conversion.svg",
+    width: 50%,
+  ),
+  caption: [Logic behing the `convert_dtypes` stage of the data loading pipeline],
+) <diagram:convert-dtypes>
+
+The next stage is to reindex the `DataFrame` from sequential integers to timestamps, using the `#Time` column as the source. This allows us to easily perform time-based operations on the data, such as resampling or rolling window calculations. After reindexing, the time channel is dropped from the `DataFrame`, as it is no longer needed. The next stage is to derive new channels from existing ones using a set of rules defined in `processing/derived_channels.py`. Most commonly these include power calculation from voltage and current channels. Finally, the column names are stripped of whitespace and normalized to a consistent case (lowercase) to avoid issues with inconsistent naming conventions in the source data#footnote("Change in column names is a frequent occurrence when switching between different versions of data recording software.").
+
 == Designing the user interface
 
 #todo("popis jak fungujou widgety v qt")
@@ -136,8 +186,141 @@ The main window of the application is also the most important one, as it serves 
 
 == Visualization
 
-render framework selfbuilt
-renderer - layout strategy - backend - matplotlib backend
+Showing users a visual representation of their data is the core functionality of the application, so designing the visual part of the user interface was a crucial aspect of the project, both from the #abbr("UI", "User Interface") and #abbr("UX", "User Experience") perspective.
+
+=== Graphing library
+
+Before diving into the specifics of the visualization system, a technology for the actual rendering of the visualizations had to be chosen. There are a number of options available for rendering visualizations in Python, each with its own advantages and disadvantages. A comparison of the most popular options available in the Python ecosystem is shown in @tab:graphing-library-comparison.
+
+#figure(
+  table(
+    columns: 3,
+    [*Technology*], [*Advantages*], [*Disadvantages*],
+    [Matplotlib],
+    [
+      - Mature and widely used library with a large community and extensive documentation
+      - Highly customizable and flexible, allowing for a wide range of visualization types and styles
+      - Good performance for static visualizations
+    ],
+    [
+      - Can be complex and difficult to learn for beginners
+      - Not ideal for interactive visualizations or real-time data updates
+    ],
+
+    [Plotly],
+    [
+      - Easy to create interactive visualizations with built-in support for zooming, panning, and tooltips
+      - Can be used in both web applications and desktop applications using frameworks like Dash
+      - Good performance for interactive visualizations
+    ],
+    [
+      - Can be overkill for simple static visualizations
+      - May have a steeper learning curve for advanced features
+    ],
+
+    [Bokeh],
+    [
+      - Designed for creating interactive visualizations in web browsers
+      - Can handle large datasets efficiently
+      - Good performance for interactive visualizations
+    ],
+    [
+      - Not ideal for static visualizations
+      - May require additional setup for use in desktop applications
+    ],
+  ),
+  caption: [Comparison of visualization technologies in Python],
+) <tab:graphing-library-comparison>
+
+The table above is not an exhaustive comparison of all the visualization technologies available in Python, but it covers some of the most popular and widely used options. All of these are solid choices that provide all the necessary features for our use case, so the decision ultimately came down to personal preference and familiarity with the library. I drafted up possible UI designs for both Matplotlib and Plotly and the results from the informal user testing sessions with potential users leaned towards *Matplotlib*, as it provided a more traditional and familiar visualization experience that was preferred by the target users. It also helped that I've had a few years of experience working with Matplotlib, namely for university assignments and personal projects.
+
+With the rendering technology chosen, the next step was to design a flexible and extensible system for creating and managing visualizations within the application. The main goal was to create a system that would allow users to easily create and customize their visualizations, while also providing a solid foundation for future development and expansion of the application's visualization capabilities.
+
+=== System architecture
+
+At the heart of the system is the `Renderer` class. It works by instantiating a `Renderer` object with a certain specification, and then calling the `render()` method to generate the visualization. The `Renderer` class is designed to be flexible and extensible, allowing for different rendering backends to be used (e.g., Matplotlib, Plotly, etc.) and for different layout strategies to be implemented (e.g., grid layout, stacked layout, etc.). The architecture of the core and data components is depicted in @diagram:rendering-system-core.
+
+#figure(
+  image("../assets/diagram/render-system/core.svg", width: 100%),
+  caption: [Architecture of the rendering system, showing the core components and their interactions],
+) <diagram:rendering-system-core>
+
+A `RenderBackend` is the unified API for a specific rendering technology that provides a consistent interface for the rest of the application to interact with, regardless of the underlying rendering technology being used. This allows for greater flexibility and modularity in the design of the application, as different rendering technologies can be easily swapped out or added without requiring significant changes to the rest of the codebase. It has a state-machine-like design with the functions being a little biased towards Matplotlib's way of doing things, as it is the primary rendering technology used in the application, but it is designed to be flexible enough to accommodate other rendering technologies in the future if needed.
+
+`LayoutStrategy` is responsible for determining how the visualizations are arranged and displayed within the application. There are basically two main layout strategies implemented in the application: *#abbr("PFP", "Per-File Plot")* and *#abbr("PCP", "Per-Channel Plot")*. The PFP strategy creates a separate plot for each selected dataset containing all selected channels, while the PCP strategy creates a separate plot for each selected channel containing all selected datasets. Both strategies have their own advantages and disadvantages, and the choice between them ultimately comes down to user preference and the specific use case. The architecture of the backend and layout components is depicted in @diagram:rendering-system-backend.
+
+#figure(
+  image("../assets/diagram/render-system/backend.svg"),
+  caption: [Architecture of the rendering system, showing the backend components and their interactions],
+) <diagram:rendering-system-backend>
+
+=== Mixins
+
+A _mixin_ is by definition a class that provides methods to other classes through inheritance, but is not intended to be instantiated on its own @mixin. In the rendering system, mixins are used to extend the functionality of a `RenderBackend` by exposing additional methods that are specific to the mixin's functionality and also having the backend implement the necessary logic to support those methods - mainly rendering.
+
+During the development, user feedback was collected and contributed to key features being added to the application, such as the ability to display the difference between two curves on a plot - a delta curve. This feature was implemented as a mixin (`DeltaMixin`) which exposes a `calculate_delta()` method that takes in two curves, performs the necessary calculations to compute the delta curve and returns it. It also defines an abstract method `plot_delta()` that must be implemented by any backend that uses the mixin, which takes care of rendering the delta curve on the plot. This design allows for a clear separation of concerns, as the mixin is responsible for the logic of calculating the delta curve, while the backend is responsible for rendering it. The architecture of the `DeltaMixin` is depicted in @diagram:delta-mixin.
+
+#figure(
+  image("../assets/diagram/render-system/delta-mixin.svg", width: 100%),
+  caption: [`DeltaMixin` architecture],
+) <diagram:delta-mixin>
+
+In practice, when a user selects the option to display the delta curve on a plot, the application does a few preliminary checks, namely whether the current context #footnote("A user selection involves zero or more files and channels. Depending on the layout, plots may contain a different number of curves. A delta curve is only calculated between exactly two curves.") and backend support it and if so, it calls the `calculate_delta()` method with the appropriate curves. The backend then performs the necessary calculations and calls the `plot_delta()` method to render the delta curve on the plot. The particular implementation of the `plot_delta()` method also adds a baseline to the plot at y=0 and dedicates the right y-axis to the delta curve, which allows for better visualization and interpretation of the delta curve in relation to the original curves. A concrete example of a plot with the delta curve rendered is shown in @img:delta-plot.
+
+#figure(
+  image("../assets/delta-plot.png", width: 110%),
+  caption: [Delta curve for two vehicles' speed channel],
+) <img:delta-plot>
+
+A need for in-plot statistical analysis features was also identified during user testing sessions, which led to the implementation of a `DescriptiveStatisticsMixin` that provides methods for calculating and displaying descriptive statistics such as mean, median, standard deviation, etc. for the selected curves on a plot. Similar to the `DeltaMixin`, it defines abstract methods (`plot_extrema()` and `plot_statistics()`) that must be implemented by any backend that uses the mixin, which take care of rendering. The architecture of the `DescriptiveStatisticsMixin` is depicted in @diagram:stats-mixin.
+
+#figure(
+  image("../assets/diagram/render-system/stats-mixin.svg", width: 100%),
+  caption: [`DescriptiveStatisticsMixin` architecture],
+) <diagram:stats-mixin>
+
+As an example of how the `DescriptiveStatisticsMixin` works in practice, when a user selects the option to display descriptive statistics on a plot, the application first checks if the current backend supports it and if so, it calls the appropriate methods to calculate the statistics for the selected curves. The backend then performs the necessary calculations and depending on the number of curves #footnote("If a plot contains a single curve, global extrema are annotated and descriptive statistics are displayed. In case of multiple curves, only the extrema are annotated for each curve.") in the plot, it may call the `plot_extrema()` method to render markers for the extrema points of each curve, and/or the `plot_statistics()` method to render a table with the calculated statistics on the plot. A concrete example of a plot with descriptive statistics rendered is shown in @img:stats-plot.
+
+#figure(
+  image("../assets/stats-plot.png", width: 110%),
+  caption: [Descriptive statistics for the speed channel of a single vehicle],
+) <img:stats-plot>
+
+=== Plugins
+
+After the core rendering system was implemented and in use by the users, the need for additional features and customizations arose. To accommodate these needs without cluttering the core rendering system with too many features that may not always be relevant, a plugin architecture was implemented. It allows us to inject additional functionality into the rendering system at different stages of the rendering process without modifying the core codebase. This design promotes modularity and separation of concerns, as plugins can be developed and maintained independently from the core rendering system, while still being able to interact with it in a well-defined way.
+
+The concept as well as the implementation itself is straightforward. A plugin is simply a callable object such as a function or a lambda, that takes in an instance of a `RenderBackend` and performs some operations on it. Different stages of the rendering process (e.g., figure creation, plot creation, etc.) get a `pre` and `post` plugin hooks assigned to them by annotating the functions themselves with the `@lifecycle` decorator #footnote("The 'pre' hook is called before the stage is executed, and the 'post' hook is called after the stage is executed automatically, the decorator only requires the hook name."), as shown in @listing:hooks. 
+
+#figure(
+  ```python
+  @lifecycle("begin_figure")
+  def begin_figure(self, ...):
+      ... 
+
+  @lifecycle("begin_plot")
+  def begin_plot(self, ...):
+      ...
+  ```,
+  caption: [Plugin hooks for the rendering stages],
+) <listing:hooks>
+
+A plugin can then be registered to any of these hooks, and it will be called at the appropriate time during the rendering process. The architecture of the plugin system is depicted in @diagram:plugins.
+
+#figure(
+  image("../assets/diagram/render-system/plugins.svg", width: 100%),
+  caption: [Backend plugin architecture],
+) <diagram:plugins>
+
+To give a more tangible example, consider a discrete flag channel (as opposed to a normal continuous channel) that indicates the status of a certain system in the vehicle, in this case the state of the heat pump. First, the channel itself is derived in the data processing stage (recall @section:data-ingestion) from a combination of multiple valves' position channels. Then, a plugin is registered to the `post_begin_plot` hook, as shown in @listing:plugin-registration, that checks if the heat pump channel is present in the plot's context and if so, it translates the discrete values of the channel to human-readable status labels and renders them as the y-axis ticks on the right y-axis of the plot.
+
+
+#figure(
+  ```python
+  renderer.backend.register_plugin('post_begin_plot', wp_status_ytics)
+  ```,
+  caption: [Plugin registration (assuming `renderer` is an instance of `Renderer`)],
+) <listing:plugin-registration>
 
 == Analysis
 

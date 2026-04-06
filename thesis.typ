@@ -88,11 +88,21 @@ rendering framework - figure management (we only do single figures rn)
     ) <etas-hardware-installed>
   ]),
   attach_content("Top-down view of ETAS hardware", [
-    #figure(
-      image("assets/measuring-etas-hardware-topview.JPG", width: 120%),
-      caption: [
-        Top-down view of the ETAS hardware installed in the backseat of a test vehicle for data aggregation.
-      ],
-    ) <etas-hardware-installed-topview>
+    #rotate(-90deg, reflow: true)[
+      #figure(
+        image("assets/measuring-etas-hardware-topview.JPG", height: 105%),
+        caption: [
+          Top-down view of the ETAS hardware installed in the backseat of a test vehicle for data aggregation.
+        ],
+      ) <etas-hardware-installed-topview>
+    ]
+  ]),
+  attach_content("Rendering system architecture", [
+    #rotate(-90deg, reflow: true)[
+      #figure(
+        caption: [Architecture of the rendering system, showing the core components and their interactions.],
+        image("assets/diagram/render-system/rendering-system.svg", width: 94%),
+      ) <diagram:rendering-system-architecture>
+    ]
   ]),
 )

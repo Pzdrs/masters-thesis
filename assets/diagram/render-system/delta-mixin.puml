@@ -1,0 +1,28 @@
+@startuml delta-mixin
+skinparam classAttributeIconSize 0
+
+class DeltaMixin <<abstract>> {
+  +calculate_delta(s1, s2)
+  +plot_delta(x, y) <<abstract>>
+}
+
+class MatplotlibBackend
+class interpolate_series <<function>>
+
+MatplotlibBackend --|> DeltaMixin
+DeltaMixin ..> interpolate_series : uses
+
+note right of DeltaMixin
+plot_delta(...) is ABSTRACT.
+Every backend that uses DeltaMixin
+MUST IMPLEMENT plot_delta.
+
+--
+
+calculate_delta:
+- interpolates s1/s2 to a common time base
+- computes abs_diff
+- calls plot_delta(x, abs_diff)
+end note
+
+@enduml

@@ -1,0 +1,129 @@
+@startuml rendering-system
+title Graph Insights — Rendering System
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+package "UI / Callers" as UI {
+  class MainWindow
+  class AnalysisOverviewDialog
+}
+
+package "Render Core" as Core {
+  class Renderer {
+    +render(files, channels, data)
+    +cleanup()
+    +set_backend(backend)
+    +set_layout_strategy(layout)
+    +set_options(options)
+  }
+
+  interface RenderBackend {
+    +register_plugin(event, callback)
+    +begin_figure(n_plots, share_x, share_y)
+    +begin_plot(index, title, **kwargs)
+    +line(x, y, label, style)
+    +end_plot()
+    +end_figure()
+    +show()
+    +cleanup_current()
+    +cleanup()
+    +get_current_plot()
+  }
+
+  class LayoutStrategy <<abstract>> {
+    +render(backend, context)
+  }
+}
+
+package "Layouts" as Layouts {
+  class PerFilePlot {
+    +render(backend, context)
+  }
+  class PerChannelPlot {
+    +render(backend, context)
+  }
+}
+
+package "Backends" as Backends {
+  class DeltaMixin <<abstract>> {
+    +calculate_delta(s1, s2)
+    +plot_delta(x, y)
+  }
+
+  class DescriptiveStatisticsMixin <<abstract>> {
+    +annotate_extrema(x, y)
+    +annotate_statistics(x, y)
+    +plot_extrema(x_min, y_min, x_max, y_max)
+    +plot_statistics(y)
+  }
+
+  class MatplotlibBackend {
+    +plot_delta(x, y)
+    +plot_extrema(x_min, y_min, x_max, y_max)
+    +plot_statistics(y)
+    +begin_figure(...)
+    +begin_plot(...)
+    +line(...)
+    +end_plot()
+    +end_figure()
+    +show()
+    +cleanup_current()
+    +cleanup()
+  }
+}
+
+package "Plugins" as Plugins {
+  class PluginCallback <<callable>>
+  class WPStatus
+}
+
+package "Render Data" as Data {
+  class RenderOptions {
+    +share_x
+    +share_y
+    +calc_deltas
+    +desc_stats
+  }
+
+  class RenderContext {
+    +files
+    +channels
+    +data
+    +options
+  }
+
+  class ReadingsFile {
+    +get_time_channel()
+    +get_channel_data(channel)
+    +get_numeric_channels()
+  }
+}
+
+MainWindow --> Renderer : submit()
+AnalysisOverviewDialog --> Renderer : inspect()
+
+Renderer --> RenderContext : builds
+Renderer --> LayoutStrategy : delegates render()
+Renderer --> RenderBackend : uses
+
+LayoutStrategy <|-- PerFilePlot
+LayoutStrategy <|-- PerChannelPlot
+PerFilePlot ..> RenderBackend : begin_figure/begin_plot/line/end_plot/end_figure/show
+PerChannelPlot ..> RenderBackend : begin_figure/begin_plot/line/end_plot/end_figure/show
+
+RenderBackend <|.. MatplotlibBackend
+MatplotlibBackend --|> DeltaMixin
+MatplotlibBackend --|> DescriptiveStatisticsMixin
+
+RenderContext --> RenderOptions
+RenderContext --> ReadingsFile : data[files]
+PerFilePlot ..> DescriptiveStatisticsMixin : annotate_* (optional)
+PerChannelPlot ..> DeltaMixin : calculate_delta (optional)
+PerChannelPlot ..> DescriptiveStatisticsMixin : annotate_* (optional)
+
+RenderBackend ..> PluginCallback : register_plugin(event, callback)
+MainWindow --> WPStatus : registers post_begin_plot
+AnalysisOverviewDialog ..> PluginCallback : passes hooks
+WPStatus ..|> PluginCallback
+
+@enduml

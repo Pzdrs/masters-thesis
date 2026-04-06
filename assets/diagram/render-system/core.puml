@@ -1,0 +1,60 @@
+@startuml core 
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+package "Render Core" as Core {
+  class Renderer {
+    +render(files, channels, data)
+    +cleanup()
+    +set_backend(backend)
+    +set_layout_strategy(layout)
+    +set_options(options)
+  }
+
+  interface RenderBackend {
+    +begin_figure(n_plots, share_x, share_y)
+    +begin_plot(index, title, **kwargs)
+    +line(x, y, label, style)
+    +end_plot()
+    +end_figure()
+    +show()
+    +cleanup_current()
+    +cleanup()
+    +get_current_plot()
+  }
+
+  class LayoutStrategy <<abstract>> {
+    +render(backend, context)
+  }
+}
+
+package "Render Data" as Data {
+  class RenderOptions {
+    +share_x
+    +share_y
+    +calc_deltas
+    +desc_stats
+  }
+
+  class RenderContext {
+    +files
+    +channels
+    +data
+    +options
+  }
+
+  class ReadingsFile {
+    +get_time_channel()
+    +get_channel_data(channel)
+    +get_numeric_channels()
+  }
+}
+
+Renderer --> RenderContext : builds
+Renderer --> LayoutStrategy : delegates render()
+Renderer --> RenderBackend : uses
+
+RenderContext --> RenderOptions
+RenderContext --> ReadingsFile : data[files]
+
+@enduml
