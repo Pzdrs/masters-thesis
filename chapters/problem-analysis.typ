@@ -1,5 +1,7 @@
 #import "../template/template.typ": *
 
+#todo("zminit ze scope je department thermosystemu")
+
 As previously mentioned, the development process of a car generates a large amount of telemetry data that needs to be analyzed by engineers and technicians. The current workflow for analyzing this data is inefficient and time-consuming, which motivates the need for a software solution that can streamline the process.
 
 == Motivation

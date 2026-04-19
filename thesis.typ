@@ -53,9 +53,10 @@
 
 #include "chapters/deployment.typ"
 
-= Possibilities for improvement
+= Possibilities for improvement <chapter:the-future>
 
 rendering framework - figure management (we only do single figures rn)
+#todo("do future expansion dat korelacni matici jako alternativu k tomu basic ahh seznamu")
 
 = Conclusion
 

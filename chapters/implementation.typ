@@ -314,7 +314,6 @@ A plugin can then be registered to any of these hooks, and it will be called at 
 
 To give a more tangible example, consider a discrete flag channel (as opposed to a normal continuous channel) that indicates the status of a certain system in the vehicle, in this case the state of the heat pump. First, the channel itself is derived in the data processing stage (recall @section:data-ingestion) from a combination of multiple valves' position channels. Then, a plugin is registered to the `post_begin_plot` hook, as shown in @listing:plugin-registration, that checks if the heat pump channel is present in the plot's context and if so, it translates the discrete values of the channel to human-readable status labels and renders them as the y-axis ticks on the right y-axis of the plot.
 
-
 #figure(
   ```python
   renderer.backend.register_plugin('post_begin_plot', wp_status_ytics)
@@ -324,8 +323,36 @@ To give a more tangible example, consider a discrete flag channel (as opposed to
 
 == Analysis
 
+The application with just the visualization features implemented already provided a lot of value to the users, as it allowed them to easily visualize and explore their data in a way that was not possible before. However, the ability to automatically extract insights and information from the data is what really takes the workflow to the next level. The goal is the following: as a user adds and removes files from the application during its lifetime, the application should be able to automatically analyze the data in the background and extract insights from it, which are then presented to the user in a clear and organized way. This takes the necessary time consuming process of inital screening of the data off the users' shoulders and allows them to focus on the actual analysis and interpretation of the data, which is where their expertise lies.
+
+I have split the process of analysis into two categories: *individual* and *comparative* #footnote("The term comparative in this context denotes a strictly pairwise framework, wherein analysis is conducted exclusively between two distinct files at a time."). This means that files are analyzed both individually and in comparison to each other, which targets different use cases and allows for a more comprehensive analysis of the data.
+
+Because the threaded pipeline pattern described and used in @section:data-ingestion worked so well for the data loading process, I decided to use a similar approach for the analysis features as well. Whenever a new file is added to the application, it goes through the processing pipeline, and once it is loaded and processed, the `on_processing_pipeline_batch_finished()` callback is triggered, which submits the file into the `IndividualAnalysisPipeline` for individual analysis. As a result, `submit_file_pairs_for_analysis()` is also called, which generates the file combinations and submits them into the `FilePairAnalysisPipeline` for comparative analysis. Both pipelines work in a separate thread and have their own set of stages that are executed in order, similar to the data loading pipeline. The results of the analysis are then stored in a cache for quick access and are also emitted as signals to update the user interface with the new insights.
+
+=== Channel data correlation
+
+In some scenarios, it may be useful to check whether certain channels are roughly (or exactly) the same across multiple files, maybe from a test drive conducted on multiple vehicles driven at the same time. Hypothetically, a technician may want to confirm that both vehicles' radiator shutters (or a blind-like alternative like the AAB @rochling_aab that are more common nowadays in Škoda vehicles) behaved the same during the test drive, which could be an indication of a potential issue with the shutters if they did not. This is where correlation analysis comes in handy. By calculating the correlation coefficient between the channel `01/roleta chladiče, skutečná poloha/---` across the corresponding files, the application can provide a quick and easy way for the user to verify whether the shutters behaved correctly or not.
+
+There are a number of different correlation coefficients that can be used to measure the correlation between two channels, such as Pearson's correlation coefficient, Spearman's rank correlation coefficient, and Kendall's tau coefficient. Each of these coefficients has its own advantages and disadvantages, and the choice of which one to use depends on the specific characteristics of the data and the analysis being performed. For this application, I chose the *Pearson's correlation *coefficient as it is a widely used measure of linear correlation between two variables and is appropriate for the type of data being analyzed.
+
+As far as the implementation goes, this feature falls under the category of comparative analysis, as it involves comparing channels across multiple files. Whenever a new file is added to the application, a set of distinct file combinations is generated using the `itertools.combinations()` function from the Python standard library. If set of currently loaded files is denoted by #"F", then the number of combinations grows according to the following formula:
+
+$ binom(abs(F), 2) = frac(abs(F)!, 2! * (abs(F) - 2)!) $
+
+This might seem like a lot of combinations, but in practice the number of files loaded at the same time is usually quite small (2-5), so it is not a problem. 
+
+The set of files is then submited into the `FilePairAnalysisPipeline`. The pipeline holds a cache of previously calculated correlation coefficients for each pair of files, so if a combination has already been analyzed before, the cached result is returned immediately without having to recalculate it. If the combination is new, the pipeline calculates the correlation coefficient for each pair of channels between the two files and stores the results in the cache for future reference. 
+
+For visualization purposes, the results are presented to the user as a table containing the list of correlated channels across multiple files, showing the correlation coefficient (color coded from red to blue, with red indicating strong negative correlation and blue indicating strong positive correlation) and a button to quickly view the two channels in question on a plot beside each other for a more detailed comparison, as shown in @img:correlations. The table columns are sortable, giving the user the ability to quickly find the most correlated channels across their files, which can be a useful starting point for further analysis and investigation. Additional forms of visualization for the correlation results are discussed in @chapter:the-future.
+
+#figure(
+  image("../assets/analysis-correlations.png", width: 110%),
+  caption: [List of correlated channels across multiple files, showing the correlation coefficient for each pair of channels in a descending order],
+) <img:correlations>
+
+=== Statistical methods for anomaly detection
+
 classic statistical methods
+=== Machine learning for anomaly detection
 machine learning methods
 supervised vs unsupervised - unsupervised needs to be monitored - we do monitor it so its the way to go
-
-ODIS vs INCA (excel vs dat)
