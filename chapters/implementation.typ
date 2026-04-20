@@ -155,8 +155,6 @@ The next stage is to reindex the `DataFrame` from sequential integers to timesta
 
 == Designing the user interface
 
-#todo("popis jak fungujou widgety v qt")
-
 The requirements for the user interface were to be simple, intuitive, and efficient for the target users, who are engineers and technicians at Škoda Auto. The application needed to provide a clear and organized way to visualize and analyze tabular data exported from ODIS, with a focus on usability and accessibility for users who may not have extensive programming experience.
 
 There are two ways to design a user interface in Qt: using code or using a visual design tool, preferably the official Qt Designer. For very simple applications, setting up all the widgets and layouts in code can be straightforward and may even be quicker and easier than wiring up a design file. However, for more complex applications with multiple windows, dialogs, and a variety of widgets, using a visual design tool is a no-brainer, as it allows developers to quickly and easily create and modify the user interface without having to write a lot of code. Qt Designer is bundled with the PyQt6 package, so no need to install it separately. Recall @nix-dev-env, where I setup an alias for the bundled Qt Designer, which allows me to simply type ```bash designer``` in the terminal to launch the Qt Designer application.
