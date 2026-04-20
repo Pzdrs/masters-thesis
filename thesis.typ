@@ -57,6 +57,7 @@
 
 rendering framework - figure management (we only do single figures rn)
 #todo("do future expansion dat korelacni matici jako alternativu k tomu basic ahh seznamu")
+#todo("stats anomalies - vic metod")
 
 = Conclusion
 

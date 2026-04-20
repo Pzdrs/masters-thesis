@@ -290,17 +290,17 @@ As an example of how the `DescriptiveStatisticsMixin` works in practice, when a 
 
 After the core rendering system was implemented and in use by the users, the need for additional features and customizations arose. To accommodate these needs without cluttering the core rendering system with too many features that may not always be relevant, a plugin architecture was implemented. It allows us to inject additional functionality into the rendering system at different stages of the rendering process without modifying the core codebase. This design promotes modularity and separation of concerns, as plugins can be developed and maintained independently from the core rendering system, while still being able to interact with it in a well-defined way.
 
-The concept as well as the implementation itself is straightforward. A plugin is simply a callable object such as a function or a lambda, that takes in an instance of a `RenderBackend` and performs some operations on it. Different stages of the rendering process (e.g., figure creation, plot creation, etc.) get a `pre` and `post` plugin hooks assigned to them by annotating the functions themselves with the `@lifecycle` decorator #footnote("The 'pre' hook is called before the stage is executed, and the 'post' hook is called after the stage is executed automatically, the decorator only requires the hook name."), as shown in @listing:hooks. 
+The concept as well as the implementation itself is straightforward. A plugin is simply a callable object such as a function or a lambda, that takes in an instance of a `RenderBackend` and performs some operations on it. Different stages of the rendering process (e.g., figure creation, plot creation, etc.) get a `pre` and `post` plugin hooks assigned to them by annotating the functions themselves with the `@lifecycle` decorator #footnote("The 'pre' hook is called before the stage is executed, and the 'post' hook is called after the stage is executed automatically, the decorator only requires the hook name."), as shown in @listing:hooks.
 
 #figure(
   ```python
   @lifecycle("begin_figure")
   def begin_figure(self, ...):
-      ... 
+    ...
 
   @lifecycle("begin_plot")
   def begin_plot(self, ...):
-      ...
+    ...
   ```,
   caption: [Plugin hooks for the rendering stages],
 ) <listing:hooks>
@@ -335,24 +335,134 @@ In some scenarios, it may be useful to check whether certain channels are roughl
 
 There are a number of different correlation coefficients that can be used to measure the correlation between two channels, such as Pearson's correlation coefficient, Spearman's rank correlation coefficient, and Kendall's tau coefficient. Each of these coefficients has its own advantages and disadvantages, and the choice of which one to use depends on the specific characteristics of the data and the analysis being performed. For this application, I chose the *Pearson's correlation *coefficient as it is a widely used measure of linear correlation between two variables and is appropriate for the type of data being analyzed.
 
-As far as the implementation goes, this feature falls under the category of comparative analysis, as it involves comparing channels across multiple files. Whenever a new file is added to the application, a set of distinct file combinations is generated using the `itertools.combinations()` function from the Python standard library. If set of currently loaded files is denoted by #"F", then the number of combinations grows according to the following formula:
+As far as the implementation goes, this feature falls under the category of comparative analysis, as it involves comparing channels across multiple files. Whenever a new file is added to the application, a set of distinct file combinations is generated using the `itertools.combinations()` function from the Python standard library. If the set of currently loaded files is denoted by #"F", then the number of combinations grows according to the following formula:
 
 $ binom(abs(F), 2) = frac(abs(F)!, 2! * (abs(F) - 2)!) $
 
-This might seem like a lot of combinations, but in practice the number of files loaded at the same time is usually quite small (2-5), so it is not a problem. 
+This might seem like a lot of combinations, but in practice the number of files loaded at the same time is usually quite small (2-5), so it is not a problem.
 
-The set of files is then submited into the `FilePairAnalysisPipeline`. The pipeline holds a cache of previously calculated correlation coefficients for each pair of files, so if a combination has already been analyzed before, the cached result is returned immediately without having to recalculate it. If the combination is new, the pipeline calculates the correlation coefficient for each pair of channels between the two files and stores the results in the cache for future reference. 
+The set of files is then submited into the `FilePairAnalysisPipeline`. The pipeline holds a cache of previously calculated correlation coefficients for each pair of files, so if a combination has already been analyzed before, the cached result is returned immediately without having to recalculate it. If the combination is new, the pipeline calculates the correlation coefficient for each pair of channels between the two files and stores the results in the cache for future reference.
 
 For visualization purposes, the results are presented to the user as a table containing the list of correlated channels across multiple files, showing the correlation coefficient (color coded from red to blue, with red indicating strong negative correlation and blue indicating strong positive correlation) and a button to quickly view the two channels in question on a plot beside each other for a more detailed comparison, as shown in @img:correlations. The table columns are sortable, giving the user the ability to quickly find the most correlated channels across their files, which can be a useful starting point for further analysis and investigation. Additional forms of visualization for the correlation results are discussed in @chapter:the-future.
 
 #figure(
   image("../assets/analysis-correlations.png", width: 110%),
-  caption: [List of correlated channels across multiple files, showing the correlation coefficient for each pair of channels in a descending order],
+  caption: [List of correlated channels across multiple files],
 ) <img:correlations>
 
 === Statistical methods for anomaly detection
 
-classic statistical methods
+Comparative analysis can be very useful for extracting insights from the data, but it cannot determine whether a particular file contains any *anomalies* or not. Be it invalid readings, unexpected behavior of a certain system in the vehicle, or just a generally weird file that doesn't really fit in with the rest of the data, it is important to be able to automatically flag these files for the user so they can take a closer look at them or even exclude them from the analysis if they are deemed to be of low quality. This is where the need for anomaly detection stems from.
+
+Anomaly detection is a technique used to identify unusual patterns or behaviors in data that do not conform to expected norms. In the context of this application, anomaly detection is used to identify parts of channel data that deviate significantly from the expected behavior, which could indicate potential issues or areas of interest for further analysis. This section focuses on purely statistical methods for anomaly detection, while the next one explores machine learning applications.
+
+There are numerous tools and techniques statistics provides for inconsistency detection, such as outlier detection methods (e.g., Z-score, IQR), time series analysis techniques (e.g., ARIMA, STL decomposition), and change point detection algorithms (e.g., PELT, Binary Segmentation). Each of these methods has its own advantages and disadvantages, and the choice of which one to use depends on the specific characteristics of the data and the type of anomalies being targeted. For this application, I implemented a simple standard deviation-based outlier detection method, which identifies data points that are a certain number of standard deviations, away from the mean as anomalies (the exact implementation is shown in @listing:std-thresholding).This method is computationally efficient and works well for normally distributed data, which our data roughly is after the processing stage. It tells us which data points are anomalous for a particular channel in a particular file.
+
+#figure(
+  [
+    ```python
+    for channel in file.get_numeric_channels():
+      channel_data = file.get_channel_data(channel)
+      mean = channel_data.mean()
+      std_dev = channel_data.std()
+      threshold = mean + 3 * std_dev
+      anomaly_points = np.where(channel_data > threshold)[0].tolist()
+    ```
+  ],
+  caption: [Standard deviation thresholding logic used in the application],
+) <listing:std-thresholding>
+
+The results are again presented to the user in a tabular fashion, showing the list of channels in a file that contain anomalies (and the amount) along with a button to quickly view the channel on a plot with the anomalous points highlighted for a more detailed analysis. Because this method falls under the category of individual analysis, the results are shown on a per-file basis by utilizing Qt's tab widget, which allows for a clear and organized presentation of the results while also providing an easy way for users to navigate between different files and their corresponding analysis results, as shown in @img:std-thresholding.
+
+#figure(
+  image("../assets/analysis-std-thresholding.png", width: 110%),
+  caption: [Visualization of the found anomalies using the standard deviation thresholding method],
+) <img:std-thresholding>
+
+As mentioned, a button is provided for each channel with anomalies that allows users to quickly view the channel on a plot with the anomalous points highlighted. The results from the analysis pipeline are in the form of a list of indices corresponding to the anomalous data points in the channel. To make this data more interpretable and actionable for the users, the application constructs intervals from data points directly adjacent to each other, as these are likely to be part of the same anomaly, and highlights these intervals on the plot using a shaded area. A concrete example of such a plot is shown in @img:std-thresholding-plot, where the anomalous intervals are highlighted in red.
+
+#figure(
+  image("../assets/analysis-std-thresholding-plot.png", width: 120%),
+  caption: [Highlighted anomalous intervals on a plot using STD thresholding],
+) <img:std-thresholding-plot>
+
 === Machine learning for anomaly detection
-machine learning methods
-supervised vs unsupervised - unsupervised needs to be monitored - we do monitor it so its the way to go
+
+The statistical methods described in the previous section are a good starting point for anomaly detection, and can reliably identify certain types of anomalies in the data. However, their entire data context is just the files loaded into the application, so any inconsistencies that may be found are only relative to the other data in the application, and not necessarily in an absolute sense. For example, it cannot reveal illogical values in a channel that are not necessarily outliers in the context of the other loaded files. This is where #abbr("ML", "Machine Learning") can lend a helping hand. We keep pretty much all the data from previous test drives on a shared drive, so we have a large amount of historical data that can be used to train ML models to identify anomalies in the data based on patterns and relationships that may not be immediately apparent through statistical methods alone. By leveraging ML techniques, the application can provide a more robust and comprehensive anomaly detection system that can help users identify potential issues and areas of interest in their data more effectively.
+
+ML algorithms can be broadly categorized into supervised and unsupervised learning methods. Supervised learning methods require labeled data for training, which means that the anomalies in the historical data would need to be identified and labeled by experts, which can be a time-consuming and labor-intensive process. Unsupervised learning methods, on the other hand, do not require labeled data and can identify anomalies based on patterns and relationships in the data itself. Given that we want to dump a bunch of historical data into the model and have it train itself without the need for manual labeling, *unsupervised* learning methods are the way to go for our use case. A couple of popular unsupervised ML algorithms for anomaly detection are compared in @tab:anomaly-detection-algorithms.
+
+#figure(
+  table(
+    columns: 4,
+    align: center,
+    stroke: 0.5pt,
+    [*Algorithm*], [*Core Idea*], [*Pros*], [*Cons*],
+
+    [Isolation Forest],
+    [Random partitioning isolates anomalies with fewer splits],
+    [
+      - Excellent scalability
+      - Handles high-dimensional data well
+      - Minimal assumptions
+      - Robust in practice
+    ],
+    [
+      - Less intuitive than simple distance-based methods
+    ],
+
+    [Local Outlier Factor (LOF)],
+    [Detects anomalies via local density deviation],
+    [
+      - Good for local structure
+    ],
+    [
+      - Struggles in high dimensions
+      - Parameter sensitive
+      - Slower than tree-based methods
+    ],
+
+    [K-Means (distance-based)],
+    [Distance from centroid determines anomaly score],
+    [
+      - Simple and fast
+    ],
+    [
+      - Assumes simple cluster shapes
+      - Less robust than isolation-based methods
+    ],
+
+    [PCA-based Detection],
+    [Projection and reconstruction error],
+    [
+      - Efficient baseline method
+    ],
+    [
+      - Limited to linear relationships
+      - Less robust than isolation-based approaches
+    ],
+  ),
+  caption: [Comparison of a few unsupervised machine learning algorithms for anomaly detection]
+) <tab:anomaly-detection-algorithms>
+
+I ultimately decided to go with the Isolation Forest algorithm, as it is a powerful and widely used method for anomaly detection that is particularly effective for high-dimensional data, which is the case with our datasets. It works by randomly partitioning the data and isolating anomalies with fewer splits, which allows it to effectively identify anomalies even in complex datasets. The implementation of the Isolation Forest algorithm is provided by the `scikit-learn` library, which makes it ridiculously easy to use and integrate into the application. 
+
+I implemented the training and validation of the model in a separare script that is run independently from the main application, as the training process can be quite time-consuming and resource-intensive, and also as not to convolute the main application codebase with ML-specific logic. The script simply takes in a location on disk where the individual files are stored and a combination of channels, which defines the model's dimensionality, and trains the model on the data from these channels across all the files. 
+
+I used `scikit`'s `Pipeline` class to create a pipeline that includes data preprocessing steps (e.g., scaling, dimensionality reduction) and the Isolation Forest algorithm itself. The trained model is then saved to disk using `joblib` which users just point the application at in the settings and the application takes care of loading it and using it for anomaly detection (the whole pipeline is extracted from the `.joblib`, so the implementation on the application side stays very lean). This also allows for the possibility of training multiple models on different combinations of channels or different subsets of the data (e.g., winter vs. summer data), and easily switching between them in the application settings without having to modify the codebase.
+
+This allows the application to point out anomalies in the sense of "Is this combination of channel values something out of the ordinary given what we have measured in the past?" which can be a very powerful tool for identifying potential issues and areas of interest in the data that may not be immediately apparent through statistical methods alone. 
+
+#todo("concrete example please")
+A concrete example blah blah. The results are again presented to the user in a tabular fashion, showing the list of files that contain anomalies based on the model's predictions along with a button to quickly view the relevant channels on a plot with the anomalous points highlighted the same way as with the statistical method (illustrated in @img:ml-anomalies-plot) for a more detailed analysis, as shown in @img:ml-anomalies.
+
+#figure(
+  image("../assets/analysis-ml-plot.png", width: 120%),
+  caption: [Highlighted anomalous points on a plot using ML (dual-channel model)],
+) <img:ml-anomalies-plot>
+
+#figure(
+  image("../assets/analysis-ml.png", width: 110%),
+  caption: [Visualization of anomalies detected using a machine learning method],
+) <img:ml-anomalies>
+
