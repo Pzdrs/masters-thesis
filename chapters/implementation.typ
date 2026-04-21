@@ -356,6 +356,8 @@ Anomaly detection is a technique used to identify unusual patterns or behaviors 
 
 There are numerous tools and techniques statistics provides for inconsistency detection, such as outlier detection methods (e.g., Z-score, IQR), time series analysis techniques (e.g., ARIMA, STL decomposition), and change point detection algorithms (e.g., PELT, Binary Segmentation). Each of these methods has its own advantages and disadvantages, and the choice of which one to use depends on the specific characteristics of the data and the type of anomalies being targeted. For this application, I implemented a simple standard deviation-based outlier detection method, which identifies data points that are a certain number of standard deviations, away from the mean as anomalies (the exact implementation is shown in @listing:std-thresholding).This method is computationally efficient and works well for normally distributed data, which our data roughly is after the processing stage. It tells us which data points are anomalous for a particular channel in a particular file.
 
+#todo("matematickej klikihak na vysvetlenie toho vzorecka")
+
 #figure(
   [
     ```python
