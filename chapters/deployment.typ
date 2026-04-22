@@ -42,5 +42,33 @@ As development progressed, I released the software to users for testing and feed
 
 == Packaging <section:packaging>
 
-pyinstaller, nuitka, brief comparison
-package skripty
+Every time a release is made, the application needs to be packaged for distribution. The requirements for packaging the application were quite specific. I wanted to create a single executable file that users could easily run as is. Installing any kind of software on the company provided machines is a bureaucratic nightmare, and I wanted to avoid asking users to go through that process just to use the application. That meant that I needed to bundle all the dependencies and resources into a single file that could be executed without any additional setup. Furthermore, I wanted the application to be cross-platform. Despite that 99% of the users are on Windows, I still wanted to support potential users on other operating systems, such as macOS and Linux. 
+
+For packaging Python applications into standalone Windows executables (.exe files), several tools are commonly used, including PyInstaller and Nuitka. During the initial release process, both options were evaluated; however, due to technical difficulties encountered with Nuitka, PyInstaller was ultimately selected as the preferred solution. This decision was further influenced by time constraints, as a functional proof of concept was already available using PyInstaller and an initial release needed to be delivered within a limited timeframe.
+
+PyInstaller uses the current platform as the target platform for the generated executable. This means that to create a Windows executable, I have to run PyInstaller on a Windows machine, which sadly can't be easily automated in a CI/CD pipeline. However, using PowerShell scripts, I was able to streamline the packaging process into more or less a single command (the PyInstaller configuration used by those scripts is shown in @listing:pyinstaller-config). The final executable generated to the `dist` directory is then manually moved to a shared drive that users have access to, where a versioned folder is created for each release. 
+
+#figure(
+  [
+    ```python
+    def install():
+      PyInstaller.__main__.run([
+          path_to_main,
+          '--add-data', 'ui/*:ui',
+          '--add-data', 'pyproject.toml:.',
+          '--add-data', 'docs/cs/site:docs/cs/site',
+          '--add-data', 'docs/en/site:docs/en/site',
+          '--onefile',
+          '--clean',
+          '--distpath', os.path.join(BASE_DIR, 'dist', RELEASE_VERSION),
+          '--collect-submodule', 'sklearn',
+          '--name', f'graph-insights-{RELEASE_VERSION}',
+      ])
+    ```
+  ],
+  caption: [PyInstaller configuration for packaging the application into a single executable file],
+) <listing:pyinstaller-config>
+
+One notable drawback of this approach is the resulting size of the executable. Because the packaging process bundles all dependencies, along with the Python interpreter itself, the final executable is relatively large (approximately 150 MB). This increase in size is an inherent consequence of consolidating all required resources into a single distributable file. Additionally, the application exhibits a longer cold start time (upwards of 30 seconds), as the bundled components must first be unpacked and the Python runtime initialized before execution of the application code can begin. 
+
+Despite my negative perspective on these issues, the collected feedback from users has been overwhelmingly positive, with no significant complaints regarding the size of the executable or the startup time. This suggests that, for the target user base, the convenience of having a single executable file outweighs the drawbacks associated with its size and startup performance.

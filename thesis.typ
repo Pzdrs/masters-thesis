@@ -66,28 +66,34 @@ rendering framework - figure management (we only do single figures rn)
 #attachments(
   attach_link("GitLab repository for the project", "https://gitlab.com/pycrs-epa/graph-insights"),
   attach_content("Instrumented engine bay", [
-    #figure(
-      image("assets/measuring-engine-bay.JPG", width: 120%),
-      caption: [
-        The engine bay of a test vehicle instrumented with additional sensors for data acquisition.
-      ],
-    ) <engine-bay>
+    #rotate(-90deg, reflow: true)[
+      #figure(
+        image("assets/measuring-engine-bay.JPG", height: 105%),
+        caption: [
+          The engine bay of a test vehicle instrumented with additional sensors for data acquisition.
+        ],
+      ) <engine-bay>
+    ]
   ]),
   attach_content("Instrumented cockpit", [
-    #figure(
-      image("assets/measuring-cockpit.JPG", width: 120%),
-      caption: [
-        State of the vehicle's cockpit during test drives.
-      ],
-    ) <cockpit>
+    #rotate(-90deg, reflow: true)[
+      #figure(
+        image("assets/measuring-cockpit.JPG", height: 105%),
+        caption: [
+          State of the vehicle's cockpit during test drives.
+        ],
+      ) <cockpit>
+    ]
   ]),
   attach_content("Installed ETAS hardware", [
-    #figure(
-      image("assets/measuring-etas-hardware.JPG", width: 120%),
-      caption: [
-        ETAS hardware installed in the backseat of a test vehicle for data aggregation.
-      ],
-    ) <etas-hardware-installed>
+    #rotate(-90deg, reflow: true)[
+      #figure(
+        image("assets/measuring-etas-hardware.JPG", height: 105%),
+        caption: [
+          ETAS hardware installed in the backseat of a test vehicle for data aggregation.
+        ],
+      ) <etas-hardware-installed>
+    ]
   ]),
   attach_content("Top-down view of ETAS hardware", [
     #rotate(-90deg, reflow: true)[
@@ -106,5 +112,8 @@ rendering framework - figure management (we only do single figures rn)
         image("assets/diagram/render-system/rendering-system.svg", width: 94%),
       ) <diagram:rendering-system-architecture>
     ]
+  ]),
+  attach_content("Miscellaneous", [
+    For linguistic and research purposes, the use of #abbr("AI", "Artificial Intelligence") was leveraged throughout some parts of the thesis, more specifically the _GPT-5_.
   ]),
 )
