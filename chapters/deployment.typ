@@ -25,8 +25,22 @@ unit tests
 pytest, coverage
 user testing - feedback from users, iterative development
 
+== Versioning and release management
 
-== Packaging
+As described in @section:dev-env, the project started with version control in mind, using Git from the very beginning. This allowed me to keep track of all changes made to the codebase and to easily revert back if thing went wrong. As far as commit messages go, I sticked to the _Conventional Commits_ specification, which provides a standardized format for commit messages @conventional_commits. This makes it easier to understand the history of the project and to generate changelogs automatically.
+
+As development progressed, I released the software to users for testing and feedback (more on release artifacts in @section:packaging). I versioned these releases using _Semantic Versioning_, which uses a three-part version number (major.minor.patch) to indicate the level of changes made in each release @semantic_versioning. During the early stages of ML analysis, I even employed a release candidate (RC) versioning scheme, which allowed me to indicate that a release was still in the testing phase and not yet ready for production use. This helped manage user expectations and encouraged them to provide feedback on the release. At the time of writing, the project is at version 1.11.0, and still in active development. I have been using annotated Git tags to mark the specific commits that correspond to each release, which makes it easy to track the history of releases and to roll back to a previous version if necessary (see @listing:git-tag). 
+
+#figure(
+  [
+    ```bash
+    git tag -a v1.11.0 -m "Release version 1.11.0"
+    ```
+  ],
+  caption: [Tagging a release commit with Git (annotated tag)],
+) <listing:git-tag>
+
+== Packaging <section:packaging>
 
 pyinstaller, nuitka, brief comparison
 package skripty

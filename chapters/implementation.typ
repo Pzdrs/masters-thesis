@@ -1,6 +1,6 @@
 #import "../template/template.typ": *
 
-== Development environment
+== Development environment <section:dev-env>
 
 Development environment refers to the tools and software used by developers to write, test, and debug their code. A good development environment can significantly improve productivity and make the development process more efficient. For this project, the development environment consisted of a combination of an #abbr("IDE", "Integrated Development Environment") and various tools for version control, testing, and documentation.
 
