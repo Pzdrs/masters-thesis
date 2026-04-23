@@ -266,7 +266,7 @@ During the development, user feedback was collected and contributed to key featu
 In practice, when a user selects the option to display the delta curve on a plot, the application does a few preliminary checks, namely whether the current context #footnote("A user selection involves zero or more files and channels. Depending on the layout, plots may contain a different number of curves. A delta curve is only calculated between exactly two curves.") and backend support it and if so, it calls the `calculate_delta()` method with the appropriate curves. The backend then performs the necessary calculations and calls the `plot_delta()` method to render the delta curve on the plot. The particular implementation of the `plot_delta()` method also adds a baseline to the plot at y=0 and dedicates the right y-axis to the delta curve, which allows for better visualization and interpretation of the delta curve in relation to the original curves. A concrete example of a plot with the delta curve rendered is shown in @img:delta-plot.
 
 #figure(
-  image("../assets/delta-plot.png", width: 110%),
+  image("../assets/plot/delta-plot.png", width: 110%),
   caption: [Delta curve for two vehicles' speed channel],
 ) <img:delta-plot>
 
@@ -280,7 +280,7 @@ A need for in-plot statistical analysis features was also identified during user
 As an example of how the `DescriptiveStatisticsMixin` works in practice, when a user selects the option to display descriptive statistics on a plot, the application first checks if the current backend supports it and if so, it calls the appropriate methods to calculate the statistics for the selected curves. The backend then performs the necessary calculations and depending on the number of curves #footnote("If a plot contains a single curve, global extrema are annotated and descriptive statistics are displayed. In case of multiple curves, only the extrema are annotated for each curve.") in the plot, it may call the `plot_extrema()` method to render markers for the extrema points of each curve, and/or the `plot_statistics()` method to render a table with the calculated statistics on the plot. A concrete example of a plot with descriptive statistics rendered is shown in @img:stats-plot.
 
 #figure(
-  image("../assets/stats-plot.png", width: 110%),
+  image("../assets/plot/stats-plot.png", width: 110%),
   caption: [Descriptive statistics for the speed channel of a single vehicle],
 ) <img:stats-plot>
 
@@ -344,7 +344,7 @@ The set of files is then submited into the `FilePairAnalysisPipeline`. The pipel
 For visualization purposes, the results are presented to the user as a table containing the list of correlated channels across multiple files, showing the correlation coefficient (color coded from red to blue, with red indicating strong negative correlation and blue indicating strong positive correlation) and a button to quickly view the two channels in question on a plot beside each other for a more detailed comparison, as shown in @img:correlations. The table columns are sortable, giving the user the ability to quickly find the most correlated channels across their files, which can be a useful starting point for further analysis and investigation. Additional forms of visualization for the correlation results are discussed in @chapter:the-future.
 
 #figure(
-  image("../assets/analysis-correlations.png", width: 110%),
+  image("../assets/ui/analysis-correlations.png", width: 110%),
   caption: [List of correlated channels across multiple files],
 ) <img:correlations>
 
@@ -354,9 +354,29 @@ Comparative analysis can be very useful for extracting insights from the data, b
 
 Anomaly detection is a technique used to identify unusual patterns or behaviors in data that do not conform to expected norms. In the context of this application, anomaly detection is used to identify parts of channel data that deviate significantly from the expected behavior, which could indicate potential issues or areas of interest for further analysis. This section focuses on purely statistical methods for anomaly detection, while the next one explores machine learning applications.
 
-There are numerous tools and techniques statistics provides for inconsistency detection, such as outlier detection methods (e.g., Z-score, IQR), time series analysis techniques (e.g., ARIMA, STL decomposition), and change point detection algorithms (e.g., PELT, Binary Segmentation). Each of these methods has its own advantages and disadvantages, and the choice of which one to use depends on the specific characteristics of the data and the type of anomalies being targeted. For this application, I implemented a simple standard deviation-based outlier detection method, which identifies data points that are a certain number of standard deviations, away from the mean as anomalies (the exact implementation is shown in @listing:std-thresholding).This method is computationally efficient and works well for normally distributed data, which our data roughly is after the processing stage. It tells us which data points are anomalous for a particular channel in a particular file.
+There are numerous tools and techniques statistics provides for inconsistency detection, such as outlier detection methods (e.g., Z-score, IQR), time series analysis techniques (e.g., ARIMA, STL decomposition), and change point detection algorithms (e.g., PELT, Binary Segmentation). Each of these methods has its own advantages and disadvantages, and the choice of which one to use depends on the specific characteristics of the data and the type of anomalies being targeted. For this application, I implemented a simple standard deviation-based outlier detection method, which identifies data points that are a certain number of standard deviations, away from the mean as anomalies (the exact implementation is shown in @listing:std-thresholding).This method is computationally efficient and works well for normally distributed data, which our data roughly is after the processing stage. It tells us which data points are anomalous for a particular channel in a particular file. Formally, the method can be described as follows:
 
-#todo("matematickej klikihak na vysvetlenie toho vzorecka")
+Let $X = {x_1, x_2, dots, x_n}$ be the set of observed values for a given channel.
+We compute the sample mean and standard deviation as:
+
+$
+  mu = 1/n sum_(i=1)^n x_i, quad
+  sigma = sqrt(1/n sum_(i=1)^n (x_i - mu)^2)
+$
+
+An anomaly detection threshold is then defined as:
+
+$
+  T = mu + k sigma
+$
+
+where $k$ is a chosen constant (in this case $k = 3$).
+
+A data point $x_i$ is classified as an anomaly if:
+
+$
+  x_i > T
+$
 
 #figure(
   [
@@ -375,14 +395,14 @@ There are numerous tools and techniques statistics provides for inconsistency de
 The results are again presented to the user in a tabular fashion, showing the list of channels in a file that contain anomalies (and the amount) along with a button to quickly view the channel on a plot with the anomalous points highlighted for a more detailed analysis. Because this method falls under the category of individual analysis, the results are shown on a per-file basis by utilizing Qt's tab widget, which allows for a clear and organized presentation of the results while also providing an easy way for users to navigate between different files and their corresponding analysis results, as shown in @img:std-thresholding.
 
 #figure(
-  image("../assets/analysis-std-thresholding.png", width: 110%),
+  image("../assets/ui/analysis-std-thresholding.png", width: 110%),
   caption: [Visualization of the found anomalies using the standard deviation thresholding method],
 ) <img:std-thresholding>
 
 As mentioned, a button is provided for each channel with anomalies that allows users to quickly view the channel on a plot with the anomalous points highlighted. The results from the analysis pipeline are in the form of a list of indices corresponding to the anomalous data points in the channel. To make this data more interpretable and actionable for the users, the application constructs intervals from data points directly adjacent to each other, as these are likely to be part of the same anomaly, and highlights these intervals on the plot using a shaded area. A concrete example of such a plot is shown in @img:std-thresholding-plot, where the anomalous intervals are highlighted in red.
 
 #figure(
-  image("../assets/analysis-std-thresholding-plot.png", width: 120%),
+  image("../assets/plot/analysis-std-thresholding-plot.png", width: 120%),
   caption: [Highlighted anomalous intervals on a plot using STD thresholding],
 ) <img:std-thresholding-plot>
 
@@ -442,27 +462,27 @@ ML algorithms can be broadly categorized into supervised and unsupervised learni
       - Less robust than isolation-based approaches
     ],
   ),
-  caption: [Comparison of a few unsupervised machine learning algorithms for anomaly detection]
+  caption: [Comparison of a few unsupervised machine learning algorithms for anomaly detection],
 ) <tab:anomaly-detection-algorithms>
 
-I ultimately decided to go with the Isolation Forest algorithm, as it is a powerful and widely used method for anomaly detection that is particularly effective for high-dimensional data, which is the case with our datasets. It works by randomly partitioning the data and isolating anomalies with fewer splits, which allows it to effectively identify anomalies even in complex datasets. The implementation of the Isolation Forest algorithm is provided by the `scikit-learn` library, which makes it ridiculously easy to use and integrate into the application. 
+I ultimately decided to go with the Isolation Forest algorithm, as it is a powerful and widely used method for anomaly detection that is particularly effective for high-dimensional data, which is the case with our datasets. It works by randomly partitioning the data and isolating anomalies with fewer splits, which allows it to effectively identify anomalies even in complex datasets. The implementation of the Isolation Forest algorithm is provided by the `scikit-learn` library, which makes it ridiculously easy to use and integrate into the application.
 
-I implemented the training and validation of the model in a separare script that is run independently from the main application, as the training process can be quite time-consuming and resource-intensive, and also as not to convolute the main application codebase with ML-specific logic. The script simply takes in a location on disk where the individual files are stored and a combination of channels, which defines the model's dimensionality, and trains the model on the data from these channels across all the files. 
+I implemented the training and validation of the model in a separare script that is run independently from the main application, as the training process can be quite time-consuming and resource-intensive, and also as not to convolute the main application codebase with ML-specific logic. The script simply takes in a location on disk where the individual files are stored and a combination of channels, which defines the model's dimensionality, and trains the model on the data from these channels across all the files.
 
 I used `scikit`'s `Pipeline` class to create a pipeline that includes data preprocessing steps (e.g., scaling, dimensionality reduction) and the Isolation Forest algorithm itself. The trained model is then saved to disk using `joblib` which users just point the application at in the settings and the application takes care of loading it and using it for anomaly detection (the whole pipeline is extracted from the `.joblib`, so the implementation on the application side stays very lean). This also allows for the possibility of training multiple models on different combinations of channels or different subsets of the data (e.g., winter vs. summer data), and easily switching between them in the application settings without having to modify the codebase.
 
-This allows the application to point out anomalies in the sense of "Is this combination of channel values something out of the ordinary given what we have measured in the past?" which can be a very powerful tool for identifying potential issues and areas of interest in the data that may not be immediately apparent through statistical methods alone. 
+This allows the application to point out anomalies in the sense of "Is this combination of channel values something out of the ordinary given what we have measured in the past?" which can be a very powerful tool for identifying potential issues and areas of interest in the data that may not be immediately apparent through statistical methods alone.
 
 #todo("concrete example please")
 A concrete example blah blah. The results are again presented to the user in a tabular fashion, showing the list of files that contain anomalies based on the model's predictions along with a button to quickly view the relevant channels on a plot with the anomalous points highlighted the same way as with the statistical method (illustrated in @img:ml-anomalies-plot) for a more detailed analysis, as shown in @img:ml-anomalies.
 
 #figure(
-  image("../assets/analysis-ml-plot.png", width: 120%),
+  image("../assets/plot/analysis-ml-plot.png", width: 120%),
   caption: [Highlighted anomalous points on a plot using ML (dual-channel model)],
 ) <img:ml-anomalies-plot>
 
 #figure(
-  image("../assets/analysis-ml.png", width: 110%),
+  image("../assets/ui/analysis-ml.png", width: 110%),
   caption: [Visualization of anomalies detected using a machine learning method],
 ) <img:ml-anomalies>
 
