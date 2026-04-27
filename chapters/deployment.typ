@@ -21,9 +21,13 @@ The documentation includes a quick start guide, which provides users with the es
 
 == Testing
 
-unit tests
-pytest, coverage
-user testing - feedback from users, iterative development
+Virtually every piece of software contains bugs, and no software is perfect. However, by implementing a robust testing strategy, we can significantly reduce the number of bugs that make it into production and ensure that our application behaves mostly as expected across changes and updates. Testing can take many forms, including unit tests, integration tests, end-to-end tests, and user testing. 
+
+In this project, I focused primarily on unit tests, which are tests that verify the behavior of individual components or functions in isolation. Unit tests are typically fast to run and can be easily automated. All unit tests are under the `tests` directory in regular python modules as functions prefixed with `test_`. I used the pytest framework for writing and running the tests, which provides a simple and powerful way to write tests in Python @pytest. To measure the test coverage, I used the `coverage` package, which allows me to see which lines of code are covered by tests and which are not @coverage. This helps me identify areas of the code that may need more testing. I was not aiming for abnormally high test coverage, because most of the results the application provides are visual and not easily testable with automated tests. Instead, I focused on testing the core logic and functionality of the application, while relying on user testing to validate the visual aspects and overall user experience. 
+
+As of version 1.11.0, the test coverage is around 70%, which I consider to be a good balance between ensuring code quality and not getting bogged down in writing tests for every single line of code.
+
+As mentioned, the user testing was also an important part of the testing strategy. I released versions of the application to users and on a weekly basis, I sat down with them to gather feedback and observe how they were using the application. This provided valuable insights into how users were interacting with the application, what features they found useful, and what areas needed improvement and what features were missing.
 
 == Versioning and release management
 
