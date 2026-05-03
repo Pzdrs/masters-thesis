@@ -33,7 +33,7 @@ As mentioned, the user testing was also an important part of the testing strateg
 
 As described in @section:dev-env, the project started with version control in mind, using Git from the very beginning. This allowed me to keep track of all changes made to the codebase and to easily revert back if thing went wrong. As far as commit messages go, I sticked to the _Conventional Commits_ specification, which provides a standardized format for commit messages @conventional_commits. This makes it easier to understand the history of the project and to generate changelogs automatically.
 
-As development progressed, I released the software to users for testing and feedback (more on release artifacts in @section:packaging). I versioned these releases using _Semantic Versioning_, which uses a three-part version number (major.minor.patch) to indicate the level of changes made in each release @semantic_versioning. During the early stages of ML analysis, I even employed a release candidate (RC) versioning scheme, which allowed me to indicate that a release was still in the testing phase and not yet ready for production use. This helped manage user expectations and encouraged them to provide feedback on the release. At the time of writing, the project is at version 1.11.0, and still in active development. I have been using annotated Git tags to mark the specific commits that correspond to each release, which makes it easy to track the history of releases and to roll back to a previous version if necessary (see @listing:git-tag). 
+As development progressed, I released the software to users for testing and feedback (more on release artifacts in @section:packaging). I versioned these releases using _Semantic Versioning_, which uses a three-part version number (major.minor.patch) to indicate the level of changes made in each release @semantic_versioning. During the early stages of ML analysis, I even employed a release candidate (RC) versioning scheme, which allowed me to indicate that a release was still in the testing phase and not yet ready for production use. This helped manage user expectations and encouraged them to provide feedback on the release. At the time of writing, the project is at version 1.11.0, and still in active development. I have been using annotated Git tags to mark the specific commits that correspond to each release, which makes it easy to track the history of releases and to roll back to a previous version if necessary (see @code:git-tag). 
 
 #figure(
   [
@@ -42,7 +42,7 @@ As development progressed, I released the software to users for testing and feed
     ```
   ],
   caption: [Tagging a release commit with Git (annotated tag)],
-) <listing:git-tag>
+) <code:git-tag>
 
 == Packaging <section:packaging>
 
@@ -50,7 +50,7 @@ Every time a release is made, the application needs to be packaged for distribut
 
 For packaging Python applications into standalone Windows executables (.exe files), several tools are commonly used, including PyInstaller and Nuitka. During the initial release process, both options were evaluated; however, due to technical difficulties encountered with Nuitka, PyInstaller was ultimately selected as the preferred solution. This decision was further influenced by time constraints, as a functional proof of concept was already available using PyInstaller and an initial release needed to be delivered within a limited timeframe.
 
-PyInstaller uses the current platform as the target platform for the generated executable. This means that to create a Windows executable, I have to run PyInstaller on a Windows machine, which sadly can't be easily automated in a CI/CD pipeline. However, using PowerShell scripts, I was able to streamline the packaging process into more or less a single command (the PyInstaller configuration used by those scripts is shown in @listing:pyinstaller-config). The final executable generated to the `dist` directory is then manually moved to a shared drive that users have access to, where a versioned folder is created for each release. 
+PyInstaller uses the current platform as the target platform for the generated executable. This means that to create a Windows executable, I have to run PyInstaller on a Windows machine, which sadly can't be easily automated in a CI/CD pipeline. However, using PowerShell scripts, I was able to streamline the packaging process into more or less a single command (the PyInstaller configuration used by those scripts is shown in @code:pyinstaller-config). The final executable generated to the `dist` directory is then manually moved to a shared drive that users have access to, where a versioned folder is created for each release. 
 
 #figure(
   [
@@ -71,7 +71,7 @@ PyInstaller uses the current platform as the target platform for the generated e
     ```
   ],
   caption: [PyInstaller configuration for packaging the application into a single executable file],
-) <listing:pyinstaller-config>
+) <code:pyinstaller-config>
 
 One notable drawback of this approach is the resulting size of the executable. Because the packaging process bundles all dependencies, along with the Python interpreter itself, the final executable is relatively large (approximately 150 MB). This increase in size is an inherent consequence of consolidating all required resources into a single distributable file. Additionally, the application exhibits a longer cold start time (upwards of 30 seconds), as the bundled components must first be unpacked and the Python runtime initialized before execution of the application code can begin. 
 

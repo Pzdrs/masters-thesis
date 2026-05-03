@@ -70,7 +70,7 @@
         caption: [
           The engine bay of a test vehicle instrumented with additional sensors for data acquisition.
         ],
-      ) <engine-bay>
+      ) <img:engine-bay>
     ]
   ]),
   attach_content("Instrumented cockpit", [
@@ -80,7 +80,7 @@
         caption: [
           State of the vehicle's cockpit during test drives.
         ],
-      ) <cockpit>
+      ) <img:cockpit>
     ]
   ]),
   attach_content("Installed ETAS hardware", [
@@ -90,7 +90,7 @@
         caption: [
           ETAS hardware installed in the backseat of a test vehicle for data aggregation.
         ],
-      ) <etas-hardware-installed>
+      ) <img:etas-hardware-installed>
     ]
   ]),
   attach_content("Top-down view of ETAS hardware", [
@@ -100,7 +100,7 @@
         caption: [
           Top-down view of the ETAS hardware installed in the backseat of a test vehicle for data aggregation.
         ],
-      ) <etas-hardware-installed-topview>
+      ) <img:etas-hardware-installed-topview>
     ]
   ]),
   attach_content("Rendering system architecture", [

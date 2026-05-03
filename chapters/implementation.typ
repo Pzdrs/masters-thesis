@@ -6,7 +6,7 @@ Development environment refers to the tools and software used by developers to w
 
 The primary IDE of choice for this project was PyCharm, a popular Python IDE developed by JetBrains. PyCharm offers a wide range of features that enhance the development experience, including intelligent code completion, code navigation, and integrated debugging tools. A heavier IDE like PyCharm was chosen over lighter code editors such as Visual Studio Code or Sublime Text because of its robust support for Python and its powerful features that can help manage a larger codebase more effectively.
 
-For the environment itself, the Nix package manager was used to create a reproducible development environment. Nix allows developers to define their development environment in a declarative way, specifying the exact versions of tools and libraries needed for the project. This ensures that all developers working on the project have a consistent environment, which can help avoid issues related to dependency conflicts or differences in tool versions while keeping everything isolated from the system environment @how_nix_works. The specific configuration used for this project is shown in @nix-dev-env, which includes Python 3.11 and the necessary packages for development. Direnv was also used to automatically load the Nix environment when entering the project directory, further streamlining the development workflow @direnv.
+For the environment itself, the Nix package manager was used to create a reproducible development environment. Nix allows developers to define their development environment in a declarative way, specifying the exact versions of tools and libraries needed for the project. This ensures that all developers working on the project have a consistent environment, which can help avoid issues related to dependency conflicts or differences in tool versions while keeping everything isolated from the system environment @how_nix_works. The specific configuration used for this project is shown in @code:nix-dev-env, which includes Python 3.11 and the necessary packages for development. Direnv was also used to automatically load the Nix environment when entering the project directory, further streamlining the development workflow @direnv.
 
 #figure(
   caption: [Nix development environment configuration],
@@ -42,9 +42,9 @@ For the environment itself, the Nix package manager was used to create a reprodu
     }
     ```
   ],
-) <nix-dev-env>
+) <code:nix-dev-env>
 
-As the Nix configuration above shows, the package manager of choice for managing Python dependencies was uv, a modern Python package manager written in Rust that provides a fast and efficient way to manage Python packages and virtual environments @uv_docs. It was chosen over more traditional tools like pip and virtualenv because of its speed, ease of use, and built-in support for dependency resolution and virtual environment management. The pyproject.toml file used by the project is shown in @pyproject-toml, which specifies the project metadata and dependencies.
+As the Nix configuration above shows, the package manager of choice for managing Python dependencies was uv, a modern Python package manager written in Rust that provides a fast and efficient way to manage Python packages and virtual environments @uv_docs. It was chosen over more traditional tools like pip and virtualenv because of its speed, ease of use, and built-in support for dependency resolution and virtual environment management. The pyproject.toml file used by the project is shown in @code:pyproject-toml, which specifies the project metadata and dependencies.
 
 #figure(
   caption: [The pyproject.toml file used by the project],
@@ -61,7 +61,7 @@ As the Nix configuration above shows, the package manager of choice for managing
     ]
     ```
   ],
-) <pyproject-toml>
+) <code:pyproject-toml>
 
 Finally, Git was used for version control, more so for the sake of good practice and maintaining a history of changes rather than for collaboration, as the project was developed solely by the author. Git allows developers to track changes to their code, revert to previous versions if needed, and manage different branches of development. When working on a new feature or a large refactor, branching allows developers to isolate their changes from the main codebase until they are ready to be merged, which can help prevent conflicts, maintain a cleaner commit history, and allows the developer to work on multiple features or bug fixes simultaneously without interference @git. For this project, a simple branching strategy was used, with a main branch for stable code and feature branches for new development. Regular commits were made to the feature branches, and once a feature was complete and tested, it was merged back into the main branch using the rebase strategy to maintain a clean commit history. The source code for the project was put up on a self-hosted GitLab instance, which provided a private repository for the project and allowed for easy access and management of the codebase.
 
@@ -157,9 +157,9 @@ The next stage is to reindex the `DataFrame` from sequential integers to timesta
 
 The requirements for the user interface were to be simple, intuitive, and efficient for the target users, who are engineers and technicians at Škoda Auto. The application needed to provide a clear and organized way to visualize and analyze tabular data exported from ODIS, with a focus on usability and accessibility for users who may not have extensive programming experience.
 
-There are two ways to design a user interface in Qt: using code or using a visual design tool, preferably the official Qt Designer. For very simple applications, setting up all the widgets and layouts in code can be straightforward and may even be quicker and easier than wiring up a design file. However, for more complex applications with multiple windows, dialogs, and a variety of widgets, using a visual design tool is a no-brainer, as it allows developers to quickly and easily create and modify the user interface without having to write a lot of code. Qt Designer is bundled with the PyQt6 package, so no need to install it separately. Recall @nix-dev-env, where I setup an alias for the bundled Qt Designer, which allows me to simply type ```bash designer``` in the terminal to launch the Qt Designer application.
+There are two ways to design a user interface in Qt: using code or using a visual design tool, preferably the official Qt Designer. For very simple applications, setting up all the widgets and layouts in code can be straightforward and may even be quicker and easier than wiring up a design file. However, for more complex applications with multiple windows, dialogs, and a variety of widgets, using a visual design tool is a no-brainer, as it allows developers to quickly and easily create and modify the user interface without having to write a lot of code. Qt Designer is bundled with the PyQt6 package, so no need to install it separately. Recall @code:nix-dev-env, where I setup an alias for the bundled Qt Designer, which allows me to simply type ```bash designer``` in the terminal to launch the Qt Designer application.
 
-Each window or dialog in the application was designed as a separate .ui file using Qt Designer. A UI file is simply an XML file that describes the layout and properties of the widgets in a particular window or dialog. Because of its text-based nature, it can be easily version-controlled and merged using Git, which is a significant advantage over binary design files used by some other frameworks. The process of loading a UI file in Python is straightforward, as shown in @listing:load-ui. The ```uic.loadUi``` function takes the path to the .ui file and the instance of the widget to load it into, and it automatically creates the necessary widgets and layouts as defined in the design file.
+Each window or dialog in the application was designed as a separate .ui file using Qt Designer. A UI file is simply an XML file that describes the layout and properties of the widgets in a particular window or dialog. Because of its text-based nature, it can be easily version-controlled and merged using Git, which is a significant advantage over binary design files used by some other frameworks. The process of loading a UI file in Python is straightforward, as shown in @code:load-ui. The ```uic.loadUi``` function takes the path to the .ui file and the instance of the widget to load it into, and it automatically creates the necessary widgets and layouts as defined in the design file.
 
 #figure(
   caption: [Loading the UI file in Python],
@@ -168,7 +168,7 @@ Each window or dialog in the application was designed as a separate .ui file usi
     uic.loadUi(path.join(BASE_DIR, 'ui/analysis_overview.ui'), self)
     ```
   ],
-) <listing:load-ui>
+) <code:load-ui>
 
 === The main window
 
@@ -180,7 +180,7 @@ The main window of the application is also the most important one, as it serves 
 #figure(
   image("../assets/ui/main-window.png", width: 110%),
   caption: [The main window of the application, designed using Qt Designer],
-) <image:main-window-ui>
+) <img:main-window-ui>
 
 == Visualization
 
@@ -236,6 +236,8 @@ With the rendering technology chosen, the next step was to design a flexible and
 
 === System architecture
 
+The rendering system is quite complex, as it needs to handle a wide range of use cases and requirements. For that reason, I chose to break it up into multiple parts (along with the diagrams) for the purposes of this thesis. A diagram of the system as a whole is shown in @diagram:rendering-system-architecture, which provides a high-level overview of the different components and their interactions.
+
 At the heart of the system is the `Renderer` class. It works by instantiating a `Renderer` object with a certain specification, and then calling the `render()` method to generate the visualization. The `Renderer` class is designed to be flexible and extensible, allowing for different rendering backends to be used (e.g., Matplotlib, Plotly, etc.) and for different layout strategies to be implemented (e.g., grid layout, stacked layout, etc.). The architecture of the core and data components is depicted in @diagram:rendering-system-core.
 
 #figure(
@@ -288,7 +290,7 @@ As an example of how the `DescriptiveStatisticsMixin` works in practice, when a 
 
 After the core rendering system was implemented and in use by the users, the need for additional features and customizations arose. To accommodate these needs without cluttering the core rendering system with too many features that may not always be relevant, a plugin architecture was implemented. It allows us to inject additional functionality into the rendering system at different stages of the rendering process without modifying the core codebase. This design promotes modularity and separation of concerns, as plugins can be developed and maintained independently from the core rendering system, while still being able to interact with it in a well-defined way.
 
-The concept as well as the implementation itself is straightforward. A plugin is simply a callable object such as a function or a lambda, that takes in an instance of a `RenderBackend` and performs some operations on it. Different stages of the rendering process (e.g., figure creation, plot creation, etc.) get a `pre` and `post` plugin hooks assigned to them by annotating the functions themselves with the `@lifecycle` decorator #footnote("The 'pre' hook is called before the stage is executed, and the 'post' hook is called after the stage is executed automatically, the decorator only requires the hook name."), as shown in @listing:hooks.
+The concept as well as the implementation itself is straightforward. A plugin is simply a callable object such as a function or a lambda, that takes in an instance of a `RenderBackend` and performs some operations on it. Different stages of the rendering process (e.g., figure creation, plot creation, etc.) get a `pre` and `post` plugin hooks assigned to them by annotating the functions themselves with the `@lifecycle` decorator #footnote("The 'pre' hook is called before the stage is executed, and the 'post' hook is called after the stage is executed automatically, the decorator only requires the hook name."), as shown in @code:hooks.
 
 #figure(
   ```python
@@ -301,7 +303,7 @@ The concept as well as the implementation itself is straightforward. A plugin is
     ...
   ```,
   caption: [Plugin hooks for the rendering stages],
-) <listing:hooks>
+) <code:hooks>
 
 A plugin can then be registered to any of these hooks, and it will be called at the appropriate time during the rendering process. The architecture of the plugin system is depicted in @diagram:plugins.
 
@@ -310,14 +312,14 @@ A plugin can then be registered to any of these hooks, and it will be called at 
   caption: [Backend plugin architecture],
 ) <diagram:plugins>
 
-To give a more tangible example, consider a discrete flag channel (as opposed to a normal continuous channel) that indicates the status of a certain system in the vehicle, in this case the state of the heat pump. First, the channel itself is derived in the data processing stage (recall @section:data-ingestion) from a combination of multiple valves' position channels. Then, a plugin is registered to the `post_begin_plot` hook, as shown in @listing:plugin-registration, that checks if the heat pump channel is present in the plot's context and if so, it translates the discrete values of the channel to human-readable status labels and renders them as the y-axis ticks on the right y-axis of the plot.
+To give a more tangible example, consider a discrete flag channel (as opposed to a normal continuous channel) that indicates the status of a certain system in the vehicle, in this case the state of the heat pump. First, the channel itself is derived in the data processing stage (recall @section:data-ingestion) from a combination of multiple valves' position channels. Then, a plugin is registered to the `post_begin_plot` hook, as shown in @code:plugin-registration, that checks if the heat pump channel is present in the plot's context and if so, it translates the discrete values of the channel to human-readable status labels and renders them as the y-axis ticks on the right y-axis of the plot.
 
 #figure(
   ```python
   renderer.backend.register_plugin('post_begin_plot', wp_status_ytics)
   ```,
   caption: [Plugin registration (assuming `renderer` is an instance of `Renderer`)],
-) <listing:plugin-registration>
+) <code:plugin-registration>
 
 == Analysis
 
@@ -354,7 +356,7 @@ Comparative analysis can be very useful for extracting insights from the data, b
 
 Anomaly detection is a technique used to identify unusual patterns or behaviors in data that do not conform to expected norms. In the context of this application, anomaly detection is used to identify parts of channel data that deviate significantly from the expected behavior, which could indicate potential issues or areas of interest for further analysis. This section focuses on purely statistical methods for anomaly detection, while the next one explores machine learning applications.
 
-There are numerous tools and techniques statistics provides for inconsistency detection, such as outlier detection methods (e.g., Z-score, IQR), time series analysis techniques (e.g., ARIMA, STL decomposition), and change point detection algorithms (e.g., PELT, Binary Segmentation). Each of these methods has its own advantages and disadvantages, and the choice of which one to use depends on the specific characteristics of the data and the type of anomalies being targeted. For this application, I implemented a simple standard deviation-based outlier detection method, which identifies data points that are a certain number of standard deviations, away from the mean as anomalies (the exact implementation is shown in @listing:std-thresholding).This method is computationally efficient and works well for normally distributed data, which our data roughly is after the processing stage. It tells us which data points are anomalous for a particular channel in a particular file. Formally, the method can be described as follows:
+There are numerous tools and techniques statistics provides for inconsistency detection, such as outlier detection methods (e.g., Z-score, IQR), time series analysis techniques (e.g., ARIMA, STL decomposition), and change point detection algorithms (e.g., PELT, Binary Segmentation). Each of these methods has its own advantages and disadvantages, and the choice of which one to use depends on the specific characteristics of the data and the type of anomalies being targeted. For this application, I implemented a simple standard deviation-based outlier detection method, which identifies data points that are a certain number of standard deviations, away from the mean as anomalies (the exact implementation is shown in @code:std-thresholding).This method is computationally efficient and works well for normally distributed data, which our data roughly is after the processing stage. It tells us which data points are anomalous for a particular channel in a particular file. Formally, the method can be described as follows:
 
 Let $X = {x_1, x_2, dots, x_n}$ be the set of observed values for a given channel.
 We compute the sample mean and standard deviation as:
@@ -390,7 +392,7 @@ $
     ```
   ],
   caption: [Standard deviation thresholding logic used in the application],
-) <listing:std-thresholding>
+) <code:std-thresholding>
 
 The results are again presented to the user in a tabular fashion, showing the list of channels in a file that contain anomalies (and the amount) along with a button to quickly view the channel on a plot with the anomalous points highlighted for a more detailed analysis. Because this method falls under the category of individual analysis, the results are shown on a per-file basis by utilizing Qt's tab widget, which allows for a clear and organized presentation of the results while also providing an easy way for users to navigate between different files and their corresponding analysis results, as shown in @img:std-thresholding.
 
