@@ -4,8 +4,11 @@ As previously mentioned, the development process of a car generates a large amou
 
 == Motivation
 
-#todo("vytahni si z prdele nejakej scenario - the WHY DATA portion")
-Let's consider the following hypothetical scenario: blah blah tohle nefunguje tak udelame test, ten nam nameri tyhle senzory a znich pozname co zpusobuje ten problem, mrd there u go proto delame testy
+To illustrate the practical motivation behind telemetry analysis, consider a situation in which a vehicle exhibits undesirable behavior only under specific operating conditions, for example insufficient cabin heating during winter driving, unexpectedly high coolant temperature during a sustained uphill climb, or unstable behavior of a controlled component such as a radiator fan. In such cases, the problem usually cannot be diagnosed reliably from a single subjective observation alone. What matters is not only that the undesired behavior occurred, but also *when* it occurred, under what load, at what speed, at what ambient temperature, and in relation to which other measured variables.
+
+This is precisely why test drives and measurement campaigns are an essential part of vehicle development. By recording telemetry data during controlled or repeatable conditions, engineers gain access to the technical context surrounding a problem. They can reconstruct the sequence of events, compare multiple runs, observe interactions between signals, and verify whether a suspected cause is actually supported by the measured data. Telemetry therefore serves not merely as an archival by-product of testing, but as a primary source of evidence for technical reasoning, validation, and decision-making.
+
+At the same time, the usefulness of telemetry data depends heavily on how easily it can be explored after acquisition. Even a well-designed test loses value if the resulting measurements are difficult to compare, slow to visualize, or cumbersome to interpret. The motivation for this thesis therefore lies not only in the existence of measurement data, but in the need to transform that data into a form that supports efficient day-to-day analytical work. For that reason, the following sections first describe how the relevant data is collected and then examine the current workflow used for its analysis.
 
 == Data collection
 

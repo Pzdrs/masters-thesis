@@ -104,5 +104,3 @@ The concept behind the application's main purpose is not complicated - it takes 
   ),
   caption: [General visualization workflow],
 ) <img:user-workflow>
-
-#todo("idk jestli tohole neposlat jinam")

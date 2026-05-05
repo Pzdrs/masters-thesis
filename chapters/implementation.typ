@@ -475,16 +475,16 @@ I used `scikit`'s `Pipeline` class to create a pipeline that includes data prepr
 
 This allows the application to point out anomalies in the sense of "Is this combination of channel values something out of the ordinary given what we have measured in the past?" which can be a very powerful tool for identifying potential issues and areas of interest in the data that may not be immediately apparent through statistical methods alone.
 
-#todo("concrete example please")
-A concrete example blah blah. The results are again presented to the user in a tabular fashion, showing the list of files that contain anomalies based on the model's predictions along with a button to quickly view the relevant channels on a plot with the anomalous points highlighted the same way as with the statistical method (illustrated in @img:ml-anomalies-plot) for a more detailed analysis, as shown in @img:ml-anomalies.
+For example, a model trained on the joint behavior of coolant temperature, vehicle speed, and radiator fan activity can flag measurements in which the cooling system behaves unlike the historical norm, even if none of the individual channels would appear suspicious when inspected in isolation. Such a result can draw attention to unusual thermal behavior during a specific drive and provide a useful starting point for a more detailed engineering investigation.
 
-#figure(
-  image("../assets/plot/analysis-ml-plot.png", width: 120%),
-  caption: [Highlighted anomalous points on a plot using ML (dual-channel model)],
-) <img:ml-anomalies-plot>
+The results are again presented to the user in a tabular fashion (illustrated in @img:ml-anomalies), showing the list of files that contain anomalies based on the model's predictions along with a button to quickly view the relevant channels on a plot with the anomalous points highlighted the same way as with the statistical method for a more detailed analysis, as shown in @img:ml-anomalies-plot.
 
 #figure(
   image("../assets/ui/analysis-ml.png", width: 110%),
   caption: [Visualization of anomalies detected using a machine learning method],
 ) <img:ml-anomalies>
 
+#figure(
+  image("../assets/plot/analysis-ml-plot.png", width: 120%),
+  caption: [Highlighted anomalous points on a plot using ML (dual-channel model)],
+) <img:ml-anomalies-plot>
