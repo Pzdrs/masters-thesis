@@ -11,8 +11,8 @@
     en: [Multiplatform desktop application for visualization and analysis of telemetry data from car test drives],
   ),
   keywords: (
-    cs: [DOPLŇTE, SEM, KLÍČOVÁ, SLOVA],
-    en: [INSERT, KEYWORDS, HERE],
+    cs: [telemetrická data, testovací jízdy automobilů, desktopová aplikace, vizualizace dat, detekce anomálií, Python, PyQt],
+    en: [telemetry data, automotive test drives, desktop application, data visualization, anomaly detection, Python, PyQt],
   ),
   acknowledgement: (
     en: [
@@ -21,10 +21,10 @@
   ),
   abstract: (
     cs: [
-      Sem vyplňte abstrakt své práce v češtině.
+      Tato diplomová práce se zabývá následným zpracováním telemetrických dat z testovacích jízd automobilů ve společnosti Škoda Auto. Cílem bylo analyzovat současný pracovní postup inženýrů a techniků, zhodnotit existující softwarová řešení a navrhnout a implementovat multiplatformní desktopovou aplikaci, která zjednoduší vizualizaci a analýzu exportovaných měřicích dat. Analytická část identifikuje hlavní slabiny stávajícího workflow, zejména opakované ruční zpracování CSV exportů, obtížné porovnávání více měření a absenci lehkého nástroje přizpůsobeného každodennímu inženýrskému použití. Na základě průzkumu existujících nástrojů byla navržena specializovaná aplikace využívající jazyk Python a UI framework PyQt. Implementované řešení podporuje načítání a předzpracování dat exportovaných z ODIS, normalizaci kanálů, práci s více datovými sadami, flexibilní vykreslování grafů, deskriptivní statistiku, vizualizaci rozdílových křivek, korelační analýzu, detekci anomálií založenou na směrodatné odchylce a rozšíření o metody strojového učení bez učitele. Práce se dále věnuje testování, dokumentaci, verzování a zabalení aplikace pro nasazení v restriktivním podnikovém prostředí. Výsledkem je funkční softwarový nástroj, který urychluje rutinní analýzu dat z testovacích jízd a vytváří základ pro další rozšiřování funkcionality.
     ],
     en: [
-      Insert the abstract of your theses in English here.
+      This thesis deals with the post-processing of telemetry data from automotive test drives at Skoda Auto. The goal was to analyze the current workflow of engineers and technicians, evaluate existing software solutions, and design and implement a multiplatform desktop application that simplifies the visualization and analysis of exported measurement data. The analytical part identifies the main weaknesses of the existing workflow, especially repetitive manual processing of CSV exports, difficult comparison of multiple measurements, and the absence of a lightweight tool adapted to everyday engineering use. Based on the survey of existing tools, a dedicated application using Python and PyQt for UI was proposed. The implemented solution supports loading and preprocessing ODIS-exported data, normalization of channels, work with multiple datasets, flexible plotting, descriptive statistics, delta-curve visualization, correlation analysis, standard deviation-based anomaly detection, and an unsupervised machine-learning extension. The thesis also covers testing, documentation, versioning, and packaging of the application for deployment in a restrictive corporate environment. The result is a working software tool that accelerates the routine analysis of test-drive data and provides a foundation for future functional expansion.
     ],
   ),
   title_pages: "title-pages.pdf",
