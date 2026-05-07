@@ -16,7 +16,7 @@
   ),
   acknowledgement: (
     en: [
-      I would like to acknowledge everyone who contributed to the creation of this fine piece of work.
+      I would like to extend my sincere gratitude to everyone who contributed to the successful completion of this thesis. First and foremost, I would like to thank my supervisor, Ing. Jan Kolaja, Ph.D., for his invaluable guidance, support, and encouragement throughout the research and writing process at graciously flexible deadlines. I am also grateful to the engineers and technicians at Škoda Auto who provided insights into the current workflow and shared their expertise, which was crucial for the practical relevance of this work and a great learning experience.
     ],
   ),
   abstract: (
